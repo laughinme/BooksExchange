@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, Heart, LogOut, Map, Menu, MessageSquare, Plus, Search, User as UserIcon } from "lucide-react";
+import { BookOpen, Heart, LogOut, Map, Menu, MessageSquare, Plus, Search, User as UserIcon, Home } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { useProfileQuery } from "@/entities/profile/model/hooks";
@@ -53,6 +53,16 @@ export const UserHeader = () => {
       </form>
 
       <div className="flex items-center gap-2 ml-auto">
+        <Button
+          variant="secondary"
+          size="sm"
+          className="hidden sm:inline-flex"
+          onClick={() => navigate("/home")}
+        >
+          <Home className="size-4" />
+          Для вас
+        </Button>
+
         <Button
           variant="secondary"
           size="sm"

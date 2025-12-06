@@ -20,7 +20,8 @@ export default defineConfig({
         target: "https://books-hack.fly.dev",
         changeOrigin: true,
         secure: true,
-        followRedirects: true
+        followRedirects: true,
+        cookieDomainRewrite: "localhost",
       }
     }
   }

@@ -44,11 +44,21 @@ const apiPrivate = axios.create({
   withCredentials: true,
 });
 
+const injectCsrfHeader = (config: InternalAxiosRequestConfig) => {
+  const csrfToken = getCsrfToken();
+  if (csrfToken) {
+    config.headers["x-csrf-token"] = csrfToken;
+  }
+  return config;
+};
+
+apiPublic.interceptors.request.use(injectCsrfHeader);
+apiPrivate.interceptors.request.use(injectCsrfHeader);
+
 apiPrivate.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getAccessToken();
     if (token) {
-      // eslint-disable-next-line no-param-reassign
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -89,10 +99,8 @@ apiPrivate.interceptors.response.use(
         setAccessToken(newToken);
 
         if (!originalRequest.headers) {
-          // eslint-disable-next-line no-param-reassign
           originalRequest.headers = new AxiosHeaders();
         }
-        // eslint-disable-next-line no-param-reassign
         (originalRequest.headers as AxiosHeaders).set(
           "Authorization",
           `Bearer ${newToken}`,

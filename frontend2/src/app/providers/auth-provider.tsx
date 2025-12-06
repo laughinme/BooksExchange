@@ -13,6 +13,7 @@ import {
   setAccessToken,
   subscribeAccessToken,
 } from "@/shared/api/axiosInstance";
+import { getCsrfToken } from "@/shared/lib/cookies";
 
 type AuthContextValue = {
   token: string | null;
@@ -33,6 +34,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const bootstrap = async () => {
       try {
+        const csrf = getCsrfToken();
+        if (!csrf) {
+          setIsAuthReady(true);
+          return;
+        }
         const data = await refreshSession();
         setAccessToken(data.access_token);
       } catch (error) {
