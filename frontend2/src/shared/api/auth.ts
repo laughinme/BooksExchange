@@ -1,5 +1,5 @@
 import { apiPrivate, apiPublic } from "@/shared/api/axiosInstance";
-import { getCookie } from "@/shared/lib/cookies";
+import { getCsrfToken } from "@/shared/lib/cookies";
 
 export type AuthResponseDto = {
   access_token: string;
@@ -24,7 +24,7 @@ export const registerRequest = (payload: RegisterPayload) =>
   apiPublic.post<AuthResponseDto>("/auth/register", payload).then((res) => res.data);
 
 export const refreshSession = () => {
-  const csrfToken = getCookie("fastapi-csrf-token");
+  const csrfToken = getCsrfToken();
 
   return apiPublic
     .post<AuthResponseDto>(

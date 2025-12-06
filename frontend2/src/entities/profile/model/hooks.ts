@@ -34,7 +34,8 @@ export const useUpdateFavoriteGenres = () => {
 
   return useMutation({
     mutationFn: (genreIds: number[]) => profileApi.updateFavoriteGenres(genreIds),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      queryClient.setQueryData<Profile>(profileQueryKey, adaptProfile(data));
       queryClient.invalidateQueries({ queryKey: profileQueryKey });
     },
   });

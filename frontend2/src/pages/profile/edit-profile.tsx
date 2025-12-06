@@ -34,6 +34,7 @@ export const EditProfilePage = () => {
   const { register, handleSubmit, reset } = useForm<FormValues>();
 
   const [selectedGenres, setSelectedGenres] = useState<Set<number>>(new Set());
+  const [genreError, setGenreError] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile) {
@@ -46,7 +47,7 @@ export const EditProfilePage = () => {
   }, [profile, reset]);
 
   const selectedGenresList = useMemo(
-    () => Array.from(selectedGenres),
+    () => Array.from(selectedGenres.values()),
     [selectedGenres],
   );
 
@@ -63,6 +64,12 @@ export const EditProfilePage = () => {
   };
 
   const onSubmit = async (values: FormValues) => {
+    if (selectedGenresList.length === 0) {
+      setGenreError("Выберите хотя бы один жанр");
+      return;
+    }
+    setGenreError(null);
+
     try {
       await updateProfile.mutateAsync({
         username: values.username,
@@ -145,6 +152,9 @@ export const EditProfilePage = () => {
                 </button>
               );
             })}
+            {genreError && (
+              <p className="w-full text-sm text-destructive">{genreError}</p>
+            )}
           </CardContent>
         </Card>
 

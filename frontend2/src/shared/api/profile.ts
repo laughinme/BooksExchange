@@ -19,8 +19,8 @@ export const profileApi = {
     return data;
   },
   updateFavoriteGenres: async (genreIds: number[]) => {
-    const { data } = await apiPrivate.put<ProfileDto>("/users/me/genres", {
-      favorite_genres: genreIds,
+    const { data } = await apiPrivate.put<ProfileDto>("/users/me/genres/", {
+      favorite_genres: genreIds.map((id) => Number(id)),
     });
     return data;
   },

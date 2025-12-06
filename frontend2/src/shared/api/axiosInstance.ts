@@ -4,7 +4,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 
-import { getCookie, clearCookie } from "@/shared/lib/cookies";
+import { clearCookie, getCsrfToken } from "@/shared/lib/cookies";
 
 const BASE_URL = import.meta.env.DEV
   ? "/api/v1"
@@ -71,7 +71,7 @@ apiPrivate.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const csrfToken = getCookie("fastapi-csrf-token");
+        const csrfToken = getCsrfToken();
         if (!csrfToken) {
           throw new Error("Missing CSRF token");
         }
