@@ -16,9 +16,23 @@ class Settings(BaseSettings):
         extra='ignore'
     )
     
+    STAGE: str = 'dev'
+    
+    @property
+    def ECHO_MODE(self) -> bool:
+        return self.STAGE == 'dev'
+    
+    @property
+    def DEBUG_MODE(self) -> bool:
+        return self.STAGE == 'dev'
+    
     # API settings
     API_PORT: int = 8080
     API_HOST: str = '0.0.0.0'
+    
+    # Site data (url, paths)
+    SITE_URL: str = ''
+    MEDIA_DIR: str = 'media'
     
     # Auth Settings    
     JWT_PRIVATE_KEY: str
@@ -31,10 +45,8 @@ class Settings(BaseSettings):
     # Database settings
     DATABASE_URL: str
     REDIS_URL: str
-
-    # Site data (url, paths)
-    SITE_URL: str = ''
-    MEDIA_DIR: str = 'media'
+    
+config = Settings() # pyright: ignore[reportCallIssue]
 
 
 def configure_logging():

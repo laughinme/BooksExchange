@@ -15,6 +15,10 @@ class UoW:
             await self.session.commit()
         elif exc_type is not None:
             await self.session.rollback()
+            
+    async def flush(self):
+        """Flush the current session."""
+        await self.session.flush()
 
     async def commit(self):
         """Manually commit the current transaction and start a new one."""

@@ -19,8 +19,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     lifespan=lifespan,
-    title='Hackathon',
-    debug=True
+    title='Books Hack',
+    debug=config.DEBUG_MODE,
+    description='Books Hack is a platform for book exchange',
 )
 
 # Mount static
@@ -35,15 +36,17 @@ app.include_router(get_webhooks())
 async def ping():
     return {'status': 'operating'}
 
-
 # Adding middlewares
+allowed_origins=[
+    "http://localhost:5173",
+    "https://localhost:5173",
+    "https://unique-banoffee-accf48.netlify.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://unique-banoffee-accf48.netlify.app",
-    ],
-    allow_methods=['*'],
-    allow_headers=['*'],
-    allow_credentials=True
+    allow_origins=allowed_origins,
+    allow_methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allow_headers=['X-CSRF-Token', 'X-Requested-With', 'Accept', 'Content-Type', 'Authorization', 'X-Client'],
+    allow_credentials=True,
 )
