@@ -28,6 +28,7 @@ export const AppRoutes = () => (
     <Route path="/register" element={<RegisterPage />} />
 
     <Route element={<ProtectedRoute />}>
+      <Route index element={<Navigate to="/home" replace />} />
       <Route path="/onboarding" element={<OnboardingPage />} />
 
       <Route element={<OnboardingGuard />}>
@@ -45,7 +46,7 @@ export const AppRoutes = () => (
         </Route>
 
         <Route element={<AdminLayout />}>
-          <Route index element={<DashboardPage />} />
+          <Route path="/admin" element={<DashboardPage />} />
           <Route path="/books" element={<ModerationPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/exchanges" element={<AdminExchangesPage />} />
