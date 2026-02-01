@@ -31,6 +31,12 @@ class UserModel(TimestampModel):
     is_onboarded: bool
     banned: bool
     public: bool = Field(..., description='Whether user wants his profile to be visible to others')
+    
+    roles: list[str] = Field(
+        alias="role_slugs",
+        default_factory=list,
+        description="User's roles."
+    )
 
 
 class UserPatch(BaseModel):
@@ -72,7 +78,3 @@ class GenresPatch(BaseModel):
         if v is not None and len(set(v)) != len(v):
             raise ValueError('Ids in favorite_genres must be unique')
         return v
-
-
-class UserRolesUpdate(BaseModel):
-    roles: list[str] = Field(default_factory=list, description="Role slugs to assign")
