@@ -43,6 +43,10 @@ export const adminApi = {
     apiPrivate
       .get<AdminBookStatsPoint[]>(`/admins/stats/books/${bookId}/stats`, { params: { days } })
       .then((res) => res.data),
+  statsBookById: (bookId: number, days = 30) =>
+    apiPrivate
+      .get<AdminBookStatsPoint[]>(`/admins/stats/books/${bookId}/stats`, { params: { days } })
+      .then((res) => res.data),
 
   listExchanges: (params?: Record<string, unknown>) =>
     apiPrivate

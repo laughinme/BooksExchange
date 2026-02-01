@@ -41,12 +41,21 @@ export const DashboardPage = () => {
   const statsQuery = useQuery({
     queryKey: ["admin", "dashboard"],
     queryFn: async () => {
-      const [booksPending, usersPage, exchangesPage, booksStats] =
+      const [
+        booksPending,
+        usersPage,
+        exchangesPage,
+        booksStats,
+        activeUsers,
+        registrations,
+      ] =
         await Promise.all([
           adminApi.listBooks({ status: "pending", limit: 1 }),
           adminApi.listUsers({ limit: 1 }),
           adminApi.listExchanges({ limit: 1 }),
           adminApi.statsBooks(30),
+          adminApi.statsActiveUsers(30),
+          adminApi.statsRegistrations(30),
         ]);
 
       return {
@@ -64,6 +73,8 @@ export const DashboardPage = () => {
           likes: p.likes,
           reserves: p.reserves,
         })),
+        activeUsers: activeUsers || [],
+        registrations: registrations || [],
       };
     },
   });
@@ -122,6 +133,48 @@ export const DashboardPage = () => {
           </ResponsiveContainer>
         </CardContent>
       </Card>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Активные пользователи (30 дней)</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[280px]">
+            <ResponsiveContainer>
+              <BarChart data={statsQuery.data?.activeUsers.map((p: any) => ({
+                name: new Date(p.day).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" }),
+                count: p.count,
+              }))}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Новые регистрации (30 дней)</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[280px]">
+            <ResponsiveContainer>
+              <BarChart data={statsQuery.data?.registrations.map((p: any) => ({
+                name: new Date(p.day).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" }),
+                count: p.count,
+              }))}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="count" fill="hsl(var(--secondary))" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
