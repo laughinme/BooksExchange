@@ -1,2 +1,2 @@
 from .providers import Provider
-from .roles import Role
+from .roles import DEFAULT_ROLE

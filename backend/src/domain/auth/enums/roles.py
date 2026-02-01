@@ -1,8 +1,9 @@
-from enum import IntEnum
+from enum import StrEnum
 
 
-class Role(IntEnum):
-    """User scopes depends on role"""
-    
-    GUEST = 10
-    ADMIN = 100
+class SystemRole(StrEnum):
+    MEMBER = "member"
+    ADMIN = "admin"
+
+
+DEFAULT_ROLE = SystemRole.MEMBER

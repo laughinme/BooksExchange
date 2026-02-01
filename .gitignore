@@ -186,3 +186,4 @@ secrets/
 /backend/src/media
 test.py
 /.vscode
+*.zip
