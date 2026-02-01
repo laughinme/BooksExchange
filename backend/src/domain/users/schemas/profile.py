@@ -1,4 +1,4 @@
-from typing import Annotated, TYPE_CHECKING
+from typing import Annotated
 from pydantic import BaseModel, Field, EmailStr, confloat, model_validator, HttpUrl, field_validator, constr
 from datetime import date
 from uuid import UUID
@@ -72,3 +72,7 @@ class GenresPatch(BaseModel):
         if v is not None and len(set(v)) != len(v):
             raise ValueError('Ids in favorite_genres must be unique')
         return v
+
+
+class UserRolesUpdate(BaseModel):
+    roles: list[str] = Field(default_factory=list, description="Role slugs to assign")

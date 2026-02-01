@@ -15,7 +15,8 @@ from database.relational_db import (
     UserGenreInterface,
     GenresInterface,
     CitiesInterface,
-    LanguagesInterface
+    LanguagesInterface,
+    RolesInterface,
 )
 from .exceptions import IncorrectGenreId, IncorrectCityId
 
@@ -29,7 +30,8 @@ class UserService:
         ug_repo: UserGenreInterface,
         genres_repo: GenresInterface,
         cities_repo: CitiesInterface,
-        lang_repo: LanguagesInterface
+        lang_repo: LanguagesInterface,
+        role_repo: RolesInterface,
         
     ):
         self.uow = uow
@@ -38,6 +40,7 @@ class UserService:
         self.genres_repo = genres_repo
         self.cities_repo = cities_repo
         self.lang_repo = lang_repo
+        self.role_repo = role_repo
         
     async def get_user(self, user_id: UUID | str) -> User | None:
         return await self.user_repo.get_by_id(user_id)
@@ -173,3 +176,30 @@ class UserService:
         await self.uow.commit()
         await self.uow.session.refresh(target)
         return target
+    
+    
+    async def admin_assign_roles(
+        self,
+        target: User,
+        role_slugs: list[str],
+    ) -> User:
+        unique_slugs = list(dict.fromkeys(role_slugs))
+        roles = await self.role_repo.get_by_slugs(unique_slugs)
+        found_slugs = {role.slug for role in roles}
+        missing = [slug for slug in unique_slugs if slug not in found_slugs]
+        if missing:
+            missing_sorted = ", ".join(sorted(missing))
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
+                detail=f"Unknown roles: {missing_sorted}",
+            )
+
+        previous_version = target.auth_version
+        await self.user_repo.assign_roles(target, roles)
+        target.bump_auth_version()
+        await self.uow.commit()
+        await self.uow.session.refresh(target)
+
+        # await self._invalidate_permissions_cache(target.id, previous_version)
+        return target
+
