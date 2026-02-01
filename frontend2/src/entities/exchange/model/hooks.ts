@@ -9,16 +9,20 @@ import { type Exchange } from "./types";
 
 export const exchangeKeys = {
   root: ["exchanges"] as const,
-  list: (type: "owned" | "requested") =>
+  list: (type: "owned" | "requested" | "all") =>
     ["exchanges", type] as const,
 };
 
-export const useExchangesQuery = (type: "owned" | "requested") =>
+export const useExchangesQuery = (type: "owned" | "requested" | "all") =>
   useQuery<Exchange[]>({
     queryKey: exchangeKeys.list(type),
     queryFn: async () => {
       const requester =
-        type === "owned" ? exchangeApi.getOwned : exchangeApi.getRequested;
+        type === "owned"
+          ? exchangeApi.getOwned
+          : type === "requested"
+            ? exchangeApi.getRequested
+            : exchangeApi.getAll;
       const data = await requester({ only_active: false });
       return data.map(adaptExchange);
     },

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 
 import { useProfileQuery } from "@/entities/profile/model/hooks";
-import { useExchangeLocationsQuery } from "@/entities/reference/model/hooks";
+import { useExchangeLocationsQuery, useNearestExchangeLocation } from "@/entities/reference/model/hooks";
 import { Spinner } from "@/shared/ui/spinner";
 
 delete (L.Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
@@ -22,6 +22,7 @@ export const MapPage = () => {
   const { data: profile } = useProfileQuery();
   const { data: locations = [], isPending, error } =
     useExchangeLocationsQuery(false);
+  const { data: nearest } = useNearestExchangeLocation();
 
   const defaultCenter: [number, number] = [55.7558, 37.6173];
   const cityId = profile?.city?.id;
@@ -59,6 +60,21 @@ export const MapPage = () => {
       >
         <X className="size-5" />
       </button>
+      {nearest && (
+        <div className="absolute left-4 top-4 z-[1000] rounded-lg bg-card/90 p-3 shadow">
+          <p className="text-sm font-semibold">Ближайшая точка</p>
+          <p className="text-sm text-muted-foreground">{nearest.title}</p>
+          <p className="text-xs text-muted-foreground">{nearest.address}</p>
+          <a
+            href={`https://yandex.ru/maps/?rtext=~${nearest.latitude},${nearest.longitude}`}
+            className="text-xs text-primary underline"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Проложить маршрут
+          </a>
+        </div>
+      )}
       <MapContainer
         key={mapKey}
         center={mapCenter}

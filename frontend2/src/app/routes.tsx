@@ -15,6 +15,7 @@ import { EditBookPage } from "@/pages/book/edit-book";
 import { ExchangesPage } from "@/pages/exchanges";
 import { MapPage } from "@/pages/map";
 import { LikedBooksPage } from "@/pages/liked-books";
+import { NearbyUsersPage } from "@/pages/nearby";
 import { DashboardPage } from "@/pages/admin/dashboard";
 import { ModerationPage } from "@/pages/admin/moderation";
 import { UsersPage } from "@/pages/admin/users";
@@ -38,6 +39,7 @@ export const AppRoutes = () => (
         <Route path="/my-exchanges" element={<ExchangesPage />} />
         <Route path="/map" element={<MapPage />} />
         <Route path="/liked-books" element={<LikedBooksPage />} />
+        <Route path="/nearby" element={<NearbyUsersPage />} />
       </Route>
 
       <Route element={<AdminLayout />}>

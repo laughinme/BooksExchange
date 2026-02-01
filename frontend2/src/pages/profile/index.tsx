@@ -21,6 +21,9 @@ export const ProfilePage = () => {
         month: "long",
       })
     : "";
+  const birthDate = profile?.birthDate
+    ? new Date(profile.birthDate).toLocaleDateString("ru-RU")
+    : null;
 
   if (profilePending) {
     return (
@@ -63,6 +66,19 @@ export const ProfilePage = () => {
                   <MapPin className="size-4" /> {profile.city.name}
                 </p>
               )}
+              {birthDate && (
+                <p className="flex items-center justify-center gap-2">
+                  <Calendar className="size-4" /> Дата рождения: {birthDate}
+                </p>
+              )}
+              {profile.languageCode && (
+                <p className="flex items-center justify-center gap-2">
+                  Язык: {profile.languageCode.toUpperCase()}
+                </p>
+              )}
+              <p className="flex items-center justify-center gap-2">
+                Статус профиля: {profile.public ? "Публичный" : "Скрытый"}
+              </p>
             </div>
             <p className="text-sm">
               {profile.bio || "Информация о себе не заполнена."}

@@ -10,7 +10,8 @@ export type AuthorDto = {
 
 export type LanguageDto = {
   code: string;
-  name: string;
+  name_ru: string;
+  name_en: string;
 };
 
 export type CityDto = {
@@ -40,7 +41,8 @@ export type Author = {
 
 export type Language = {
   code: string;
-  name: string;
+  nameRu: string;
+  nameEn: string;
 };
 
 export type City = {

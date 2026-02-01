@@ -8,6 +8,8 @@ import {
 } from "@/entities/exchange/model/hooks";
 import { type ExchangeActionPayload } from "@/shared/api/exchanges";
 import { type Exchange } from "@/entities/exchange/model/types";
+import { adaptExchange } from "@/entities/exchange/model/adapters";
+import { exchangeApi } from "@/shared/api/exchanges";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card } from "@/shared/ui/card";
@@ -35,6 +37,7 @@ const ExchangeCard = ({
     action: "accept" | "decline" | "cancel" | "finish",
     exchangeId: number,
   ) => void;
+  onInfo?: (exchangeId: number) => void;
 }) => {
   const partner = type === "owned" ? exchange.requester : exchange.owner;
 
@@ -116,6 +119,15 @@ const ExchangeCard = ({
               </Button>
             </>
           )}
+          {onInfo && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onInfo(exchange.id)}
+            >
+              Детали
+            </Button>
+          )}
         </div>
       </div>
     </Card>
@@ -123,13 +135,14 @@ const ExchangeCard = ({
 };
 
 export const ExchangesPage = () => {
-  const [tab, setTab] = useState<"owned" | "requested">("owned");
+  const [tab, setTab] = useState<"owned" | "requested" | "all">("owned");
   const [reasonModal, setReasonModal] = useState<{
     open: boolean;
     exchangeId: number | null;
     action: "decline" | "cancel" | null;
   }>({ open: false, exchangeId: null, action: null });
   const [reasonText, setReasonText] = useState("");
+  const [detail, setDetail] = useState<Exchange | null>(null);
   const navigate = useNavigate();
   const { data: exchanges = [], isPending, error, refetch } =
     useExchangesQuery(tab);
@@ -201,6 +214,17 @@ export const ExchangesPage = () => {
         >
           Мои запросы
         </button>
+        <button
+          type="button"
+          className={`border-b-2 px-4 py-2 text-sm font-semibold ${
+            tab === "all"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground"
+          }`}
+          onClick={() => setTab("all")}
+        >
+          Все
+        </button>
       </div>
 
       {isPending && (
@@ -235,6 +259,10 @@ export const ExchangesPage = () => {
               exchange={exchange}
               type={tab}
               onAction={handleAction}
+              onInfo={async (id) => {
+                const dto = await exchangeApi.getById(id);
+                setDetail(adaptExchange(dto));
+              }}
             />
           ))}
         </div>
@@ -282,6 +310,32 @@ export const ExchangesPage = () => {
               >
                 Отправить
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {detail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-lg rounded-lg bg-card p-6 shadow-lg">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Детали обмена</h3>
+              <button
+                type="button"
+                onClick={() => setDetail(null)}
+                className="text-muted-foreground"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div><strong>Книга:</strong> {detail.book.title}</div>
+              <div><strong>Автор:</strong> {detail.book.author.name}</div>
+              <div><strong>Владелец:</strong> {detail.owner.username}</div>
+              <div><strong>Запросивший:</strong> {detail.requester.username}</div>
+              <div><strong>Статус:</strong> {detail.progress}</div>
+              {detail.cancelReason && <div><strong>Причина:</strong> {detail.cancelReason}</div>}
+              <div><strong>Создан:</strong> {new Date(detail.createdAt).toLocaleString()}</div>
             </div>
           </div>
         </div>

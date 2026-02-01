@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { profileApi } from "@/shared/api/profile";
-import { adaptProfile } from "./adapters";
-import { type Profile, type UpdateProfilePayload } from "./types";
+import { adaptProfile, adaptNearbyUser } from "./adapters";
+import { type Profile, type UpdateProfilePayload, type NearbyUser } from "./types";
 
 export const profileQueryKey = ["profile"];
 
@@ -51,3 +51,12 @@ export const useUpdateProfilePicture = () => {
     },
   });
 };
+
+export const useNearbyUsers = (radius_km?: number) =>
+  useQuery<NearbyUser[]>({
+    queryKey: ["nearby-users", radius_km],
+    queryFn: async () => {
+      const data = await profileApi.getNearbyUsers(radius_km);
+      return data.map((dto: any) => adaptNearbyUser(dto));
+    },
+  });

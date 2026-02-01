@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from "react-router-dom";
-import { BookOpen, Map, Plus, Repeat, User as UserIcon } from "lucide-react";
+import { BookOpen, Map, MapPin, Plus, Repeat, User as UserIcon } from "lucide-react";
 
 import { UserHeader } from "./user-header";
 
@@ -31,6 +31,15 @@ export const UserLayout = () => {
           >
             <Map className="size-5" />
             <span>Карта</span>
+          </NavLink>
+          <NavLink
+            to="/nearby"
+            className={({ isActive }) =>
+              `flex flex-col items-center gap-1 rounded-md px-3 py-1.5 ${isActive ? "text-primary" : ""}`
+            }
+          >
+            <MapPin className="size-5" />
+            <span>Рядом</span>
           </NavLink>
           <NavLink to="/add-book" className="relative -top-4">
             <div className="rounded-full bg-primary text-primary-foreground p-3 shadow-lg shadow-black/40">

@@ -17,6 +17,10 @@ export const referenceApi = {
     const { data } = await apiPrivate.get<AuthorDto[]>("/books/authors/");
     return data;
   },
+  getAuthorById: async (authorId: number) => {
+    const { data } = await apiPrivate.get<AuthorDto>(`/books/authors/${authorId}/`);
+    return data;
+  },
   getLanguages: async () => {
     const { data } = await apiPrivate.get<LanguageDto[]>("/languages/");
     return data;
@@ -30,6 +34,16 @@ export const referenceApi = {
       "/geo/exchange_locations/",
       { params: { filter: filterByDistance } },
     );
+    return data;
+  },
+  getNearestExchangeLocation: async () => {
+    const { data } = await apiPrivate.get<ExchangeLocationDto>(
+      "/geo/exchange_locations/nearest",
+    );
+    return data;
+  },
+  getGenreById: async (genreId: number) => {
+    const { data } = await apiPrivate.get<GenreDto>(`/books/genres/${genreId}/`);
     return data;
   },
 };

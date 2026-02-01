@@ -11,6 +11,7 @@ import { type Book } from "@/entities/book/model/types";
 import { ReserveBookModal } from "@/features/book/ui/reserve-book-modal";
 import { useProfileQuery } from "@/entities/profile/model/hooks";
 import { type Profile } from "@/entities/profile/model/types";
+import { useAuthorQuery, useGenreQuery } from "@/entities/reference/model/hooks";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import {
@@ -69,6 +70,8 @@ type BookDetailContentProps = {
 const BookDetailContent = ({ book, profile, onBack }: BookDetailContentProps) => {
   const toggleLike = useToggleLike();
   const navigate = useNavigate();
+  const authorDetails = useAuthorQuery(book.author.id);
+  const genreDetails = useGenreQuery(book.genre.id);
 
   const [activeImage, setActiveImage] = useState(0);
   const [likeCount, setLikeCount] = useState(book.totalLikes);
@@ -174,7 +177,7 @@ const BookDetailContent = ({ book, profile, onBack }: BookDetailContentProps) =>
                     {book.title}
                   </h1>
                   <p className="text-lg text-primary font-semibold">
-                    {book.author.name}
+                    {authorDetails.data?.name ?? book.author.name}
                   </p>
                 </div>
 

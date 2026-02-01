@@ -23,7 +23,8 @@ export const adaptAuthor = (dto: AuthorDto): Author => ({
 
 export const adaptLanguage = (dto: LanguageDto): Language => ({
   code: dto.code,
-  name: dto.name,
+  nameRu: dto.name_ru,
+  nameEn: dto.name_en,
 });
 
 export const adaptCity = (dto: CityDto): City => ({

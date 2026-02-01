@@ -30,6 +30,7 @@ const statusLabels: Record<Exchange["progress"], string> = {
 export const AdminExchangesPage = () => {
   const [status, setStatus] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Exchange | null>(null);
 
   const exchangesQuery = useQuery({
     queryKey: ["admin", "exchanges", status, search],
@@ -52,6 +53,11 @@ export const AdminExchangesPage = () => {
     mutationFn: (exchangeId: number) =>
       adminApi.forceCancelExchange(exchangeId),
     onSuccess: () => exchangesQuery.refetch(),
+  });
+
+  const loadDetail = useMutation({
+    mutationFn: (exchangeId: number) => adminApi.getExchange(exchangeId),
+    onSuccess: (dto) => setSelected(adaptExchange(dto)),
   });
 
   return (
@@ -124,20 +130,20 @@ export const AdminExchangesPage = () => {
                   className="h-28 w-20 rounded object-cover"
                 />
                 <div className="flex-1 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <BookOpen className="size-4" />
-                        <h3 className="font-semibold">{ex.book.title}</h3>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {ex.book.author.name}
-                      </p>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="size-4" />
+                      <h3 className="font-semibold">{ex.book.title}</h3>
                     </div>
-                    <span className="rounded-full bg-muted px-2 py-1 text-xs font-semibold">
-                      {statusLabels[ex.progress]}
-                    </span>
+                    <p className="text-sm text-muted-foreground">
+                      {ex.book.author.name}
+                    </p>
                   </div>
+                  <span className="rounded-full bg-muted px-2 py-1 text-xs font-semibold">
+                    {statusLabels[ex.progress]}
+                  </span>
+                </div>
                   <div className="grid grid-cols-1 gap-2 text-sm text-muted-foreground md:grid-cols-3">
                     <div className="flex items-center gap-2">
                       <User className="size-4" />
@@ -172,12 +178,45 @@ export const AdminExchangesPage = () => {
                         <X className="size-4" /> Принудительно отменить
                       </Button>
                     )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => loadDetail.mutate(ex.id)}
+                    >
+                      Детали
+                    </Button>
                   </div>
                 </div>
               </Card>
             ))}
           </div>
         )}
+
+      {selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <Card className="w-full max-w-2xl p-6 relative">
+            <button
+              type="button"
+              className="absolute right-4 top-4 text-muted-foreground"
+              onClick={() => setSelected(null)}
+            >
+              <X className="size-5" />
+            </button>
+            <h3 className="text-xl font-semibold mb-3">Детали обмена</h3>
+            <div className="space-y-2 text-sm">
+              <div><strong>Книга:</strong> {selected.book.title}</div>
+              <div><strong>Автор:</strong> {selected.book.author.name}</div>
+              <div><strong>Владелец:</strong> {selected.owner.username}</div>
+              <div><strong>Запросивший:</strong> {selected.requester.username}</div>
+              <div><strong>Статус:</strong> {statusLabels[selected.progress]}</div>
+              {selected.cancelReason && (
+                <div><strong>Причина отмены/отказа:</strong> {selected.cancelReason}</div>
+              )}
+              <div><strong>Создан:</strong> {new Date(selected.createdAt).toLocaleString()}</div>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

@@ -7,12 +7,27 @@ export type ExchangeActionPayload = {
 };
 
 export const exchangeApi = {
+  getAll: async (params?: { only_active?: boolean }) => {
+    const { data } = await apiPrivate.get<ExchangeDto[]>("/exchanges/", { params });
+    return data;
+  },
   getOwned: async (params?: { only_active?: boolean }) => {
     const { data } = await apiPrivate.get<ExchangeDto[]>("/exchanges/owned", { params });
     return data;
   },
   getRequested: async (params?: { only_active?: boolean }) => {
     const { data } = await apiPrivate.get<ExchangeDto[]>("/exchanges/requested", { params });
+    return data;
+  },
+  getById: async (exchangeId: number | string) => {
+    const { data } = await apiPrivate.get<ExchangeDto>(`/exchanges/${exchangeId}/`);
+    return data;
+  },
+  edit: async (exchangeId: number, payload: { meeting_time?: string | null }) => {
+    const { data } = await apiPrivate.patch<ExchangeDto>(
+      `/exchanges/${exchangeId}/`,
+      payload,
+    );
     return data;
   },
   accept: async (exchangeId: number) => {
