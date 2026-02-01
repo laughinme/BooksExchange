@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from database.relational_db import User
 from domain.books import BookModel, ApprovalStatus
 from core.config import Settings
-from core.security import auth_admin
+from core.security import require
 from service.books import BookService, get_books_service
 
 router = APIRouter()
@@ -17,7 +17,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
     summary='List all books with filters',
 )
 async def get_books(
-    _: Annotated[User, Depends(auth_admin)],
+    _: Annotated[User, Depends(require('admin'))],
     svc: Annotated[BookService, Depends(get_books_service)],
     status: ApprovalStatus = Query(ApprovalStatus.PENDING, description='Approval status to filter by'),
     # query: str = Query(None, description='Search by title or author'),

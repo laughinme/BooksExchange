@@ -6,7 +6,7 @@ from database.relational_db import User
 from domain.admin import ModerationReason
 from domain.books import BookModel
 from core.config import Settings
-from core.security import auth_admin
+from core.security import require
 from service.books import BookService, get_books_service
 
 router = APIRouter()
@@ -19,7 +19,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 )
 async def accept_book(
     book_id: Annotated[UUID, Path(description='Book ID')],
-    user: Annotated[User, Depends(auth_admin)],
+    user: Annotated[User, Depends(require('admin'))],
     svc: Annotated[BookService, Depends(get_books_service)],
 ):
     book = await svc.approve_book(book_id, user)
@@ -34,7 +34,7 @@ async def accept_book(
 async def reject_book(
     payload: ModerationReason,
     book_id: Annotated[UUID, Path(description='Book ID')],
-    user: Annotated[User, Depends(auth_admin)],
+    user: Annotated[User, Depends(require('admin'))],
     svc: Annotated[BookService, Depends(get_books_service)],
 ):
     book = await svc.reject_book(book_id, user, payload.reason)
