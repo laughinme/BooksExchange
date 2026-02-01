@@ -124,6 +124,12 @@ const ExchangeCard = ({
 
 export const ExchangesPage = () => {
   const [tab, setTab] = useState<"owned" | "requested">("owned");
+  const [reasonModal, setReasonModal] = useState<{
+    open: boolean;
+    exchangeId: number | null;
+    action: "decline" | "cancel" | null;
+  }>({ open: false, exchangeId: null, action: null });
+  const [reasonText, setReasonText] = useState("");
   const navigate = useNavigate();
   const { data: exchanges = [], isPending, error, refetch } =
     useExchangesQuery(tab);
@@ -135,10 +141,26 @@ export const ExchangesPage = () => {
   ) => {
     let payload: ExchangeActionPayload | undefined;
     if (actionType === "decline" || actionType === "cancel") {
-      const reason = window.prompt("Укажите причину (необязательно)");
-      payload = { cancel_reason: reason || undefined };
+      setReasonModal({ open: true, exchangeId, action: actionType });
+      setReasonText("");
+      return;
     }
     await action.mutateAsync({ action: actionType, exchangeId, payload });
+    refetch();
+  };
+
+  const submitReason = async () => {
+    if (!reasonModal.exchangeId || !reasonModal.action) return;
+    const payload: ExchangeActionPayload = {
+      cancel_reason: reasonText.trim() || undefined,
+    };
+    await action.mutateAsync({
+      action: reasonModal.action,
+      exchangeId: reasonModal.exchangeId,
+      payload,
+    });
+    setReasonModal({ open: false, exchangeId: null, action: null });
+    setReasonText("");
     refetch();
   };
 
@@ -215,6 +237,53 @@ export const ExchangesPage = () => {
               onAction={handleAction}
             />
           ))}
+        </div>
+      )}
+
+      {reasonModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-md rounded-lg bg-card p-6 shadow-lg">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-lg font-semibold">
+                {reasonModal.action === "decline" ? "Причина отказа" : "Причина отмены"}
+              </h3>
+              <button
+                type="button"
+                onClick={() =>
+                  setReasonModal({ open: false, exchangeId: null, action: null })
+                }
+                className="text-muted-foreground"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">
+              Укажите причину (необязательно). Она будет отправлена второй стороне.
+            </p>
+            <textarea
+              className="w-full rounded-md border border-border/70 bg-background px-3 py-2 text-sm"
+              rows={4}
+              value={reasonText}
+              onChange={(e) => setReasonText(e.target.value)}
+              placeholder="Например: не смогу встретиться, передумал"
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() =>
+                  setReasonModal({ open: false, exchangeId: null, action: null })
+                }
+              >
+                Отмена
+              </Button>
+              <Button
+                onClick={submitReason}
+                disabled={action.isPending}
+              >
+                Отправить
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

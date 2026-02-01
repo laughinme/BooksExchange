@@ -90,4 +90,5 @@ export type UpdateBookPayload = Partial<CreateBookPayload>;
 
 export type ReserveBookPayload = {
   comment?: string;
+  meeting_time?: string;
 };

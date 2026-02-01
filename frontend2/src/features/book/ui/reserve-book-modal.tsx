@@ -5,6 +5,7 @@ import { useReserveBook } from "@/entities/book/model/hooks";
 import { type Book } from "@/entities/book/model/types";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Label } from "@/shared/ui/label";
 import { Textarea } from "@/shared/ui/textarea";
 
 type ReserveBookModalProps = {
@@ -19,6 +20,7 @@ export const ReserveBookModal = ({
   onSuccess,
 }: ReserveBookModalProps) => {
   const [comment, setComment] = useState("");
+  const [meetingTime, setMeetingTime] = useState<string>("");
   const reserveMutation = useReserveBook();
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +28,14 @@ export const ReserveBookModal = ({
     event.preventDefault();
     setError(null);
     try {
-      await reserveMutation.mutateAsync({ bookId: book.id, comment });
+      const payload = {
+        bookId: book.id,
+        comment,
+        meeting_time: meetingTime
+          ? new Date(meetingTime).toISOString()
+          : undefined,
+      };
+      await reserveMutation.mutateAsync(payload);
       onSuccess?.();
       onClose();
     } catch {
@@ -53,6 +62,20 @@ export const ReserveBookModal = ({
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">
+                Время встречи (опционально)
+              </Label>
+              <input
+                type="datetime-local"
+                className="w-full rounded-md border border-border/70 bg-background px-3 py-2 text-sm"
+                value={meetingTime}
+                onChange={(e) => setMeetingTime(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Будет отправлено в UTC. Укажите удобное время для передачи книги.
+              </p>
+            </div>
             <Textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}

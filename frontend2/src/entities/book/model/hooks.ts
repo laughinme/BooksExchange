@@ -72,10 +72,12 @@ export const useReserveBook = () => {
     mutationFn: ({
       bookId,
       comment,
+      meeting_time,
     }: {
       bookId: number;
       comment?: string;
-    }) => bookApi.reserve(bookId, { comment }),
+      meeting_time?: string;
+    }) => bookApi.reserve(bookId, { comment, meeting_time }),
     onSuccess: (_, { bookId }) => {
       queryClient.invalidateQueries({ queryKey: bookKeys.detail(bookId) });
       queryClient.invalidateQueries({ queryKey: bookKeys.all });
