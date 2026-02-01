@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import { ProtectedRoute } from "@/shared/routing/protected-route";
+import { OnboardingGuard } from "@/shared/routing/onboarding-guard";
 import { UserLayout } from "@/widgets/layout/user-layout";
 import { AdminLayout } from "@/widgets/layout/admin-layout";
 import { LoginPage } from "@/pages/auth/login";
@@ -29,24 +30,26 @@ export const AppRoutes = () => (
     <Route element={<ProtectedRoute />}>
       <Route path="/onboarding" element={<OnboardingPage />} />
 
-      <Route element={<UserLayout />}>
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/profile/edit" element={<EditProfilePage />} />
-        <Route path="/add-book" element={<AddBookPage />} />
-        <Route path="/book/:bookId" element={<BookDetailPage />} />
-        <Route path="/book/:bookId/edit" element={<EditBookPage />} />
-        <Route path="/my-exchanges" element={<ExchangesPage />} />
-        <Route path="/map" element={<MapPage />} />
-        <Route path="/liked-books" element={<LikedBooksPage />} />
-        <Route path="/nearby" element={<NearbyUsersPage />} />
-      </Route>
+      <Route element={<OnboardingGuard />}>
+        <Route element={<UserLayout />}>
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/edit" element={<EditProfilePage />} />
+          <Route path="/add-book" element={<AddBookPage />} />
+          <Route path="/book/:bookId" element={<BookDetailPage />} />
+          <Route path="/book/:bookId/edit" element={<EditBookPage />} />
+          <Route path="/my-exchanges" element={<ExchangesPage />} />
+          <Route path="/map" element={<MapPage />} />
+          <Route path="/liked-books" element={<LikedBooksPage />} />
+          <Route path="/nearby" element={<NearbyUsersPage />} />
+        </Route>
 
-      <Route element={<AdminLayout />}>
-        <Route index element={<DashboardPage />} />
-        <Route path="/books" element={<ModerationPage />} />
-        <Route path="/users" element={<UsersPage />} />
-        <Route path="/exchanges" element={<AdminExchangesPage />} />
+        <Route element={<AdminLayout />}>
+          <Route index element={<DashboardPage />} />
+          <Route path="/books" element={<ModerationPage />} />
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/exchanges" element={<AdminExchangesPage />} />
+        </Route>
       </Route>
     </Route>
 

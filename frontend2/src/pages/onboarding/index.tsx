@@ -3,11 +3,13 @@ import { useForm } from "react-hook-form";
 import { BookOpen, Plus, User as UserIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 
 import {
   useUpdateFavoriteGenres,
   useUpdateProfile,
   useUpdateProfilePicture,
+  useProfileQuery,
 } from "@/entities/profile/model/hooks";
 import { profileQueryKey } from "@/entities/profile/model/hooks";
 import { useCitiesQuery, useGenresQuery } from "@/entities/reference/model/hooks";
@@ -25,6 +27,7 @@ type FormValues = {
 export const OnboardingPage = () => {
   const { data: genres = [], isLoading: genresLoading } = useGenresQuery();
   const { data: cities = [], isLoading: citiesLoading } = useCitiesQuery();
+  const { data: profile } = useProfileQuery();
 
   const [selectedGenres, setSelectedGenres] = useState<Set<number>>(new Set());
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -76,8 +79,15 @@ export const OnboardingPage = () => {
         bio: values.bio,
         city_id: Number(values.city_id),
       });
-      if (selectedGenresList.length > 0) {
-        await updateGenres.mutateAsync(selectedGenresList);
+      const alreadyHasGenres = (profile?.favoriteGenres?.length ?? 0) > 0;
+      if (selectedGenresList.length > 0 && !alreadyHasGenres) {
+        try {
+          await updateGenres.mutateAsync(selectedGenresList);
+        } catch (err) {
+          if (!(isAxiosError(err) && err.response?.status === 400)) {
+            throw err;
+          }
+        }
       }
       if (values.avatar && values.avatar.length > 0) {
         const formData = new FormData();
@@ -177,7 +187,7 @@ export const OnboardingPage = () => {
                   );
                 })}
               </div>
-              {selectedGenres.size === 0 && (
+              {selectedGenres.size === 0 && (profile?.favoriteGenres?.length ?? 0) === 0 && (
                 <p className="text-xs text-destructive">
                   Выберите хотя бы один жанр.
                 </p>
