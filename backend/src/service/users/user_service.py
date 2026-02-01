@@ -55,6 +55,9 @@ class UserService:
         
         for field, value in data.items():
             setattr(user, field, value)
+
+        if not user.is_onboarded:
+            user.is_onboarded = True
             
         await self.uow.commit()
             
