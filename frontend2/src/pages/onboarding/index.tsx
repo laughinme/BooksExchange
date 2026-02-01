@@ -93,14 +93,16 @@ export const OnboardingPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="relative flex min-h-screen items-center justify-center bg-background">
+        <div className="absolute inset-0 -z-10 be-app-bg" />
         Загружаем данные...
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-10">
+      <div className="absolute inset-0 -z-10 be-app-bg" />
       <Card className="w-full max-w-2xl">
         <CardHeader className="flex items-center justify-center gap-2">
           <BookOpen className="size-7 text-primary" />

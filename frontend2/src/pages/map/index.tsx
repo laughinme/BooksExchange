@@ -24,8 +24,9 @@ export const MapPage = () => {
     useExchangeLocationsQuery(false);
 
   const defaultCenter: [number, number] = [55.7558, 37.6173];
-  const cityLocation = profile?.city
-    ? locations.find((loc) => loc.city.id === profile.city.id)
+  const cityId = profile?.city?.id;
+  const cityLocation = cityId
+    ? locations.find((loc) => loc.city.id === cityId)
     : undefined;
   const mapCenter: [number, number] = cityLocation
     ? [cityLocation.latitude, cityLocation.longitude]
@@ -63,7 +64,7 @@ export const MapPage = () => {
         center={mapCenter}
         zoom={zoom}
         scrollWheelZoom
-        style={{ height: "100%", width: "100%" }}
+        className="h-full w-full"
       >
         <TileLayer
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>'
