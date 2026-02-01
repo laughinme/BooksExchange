@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
-import { useAuth } from "@/app/providers/auth-provider";
+import { useAuth } from "@/app/providers/use-auth";
 import { Spinner } from "@/shared/ui/spinner";
 
 export const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {

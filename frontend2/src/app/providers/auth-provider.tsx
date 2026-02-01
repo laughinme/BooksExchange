@@ -1,6 +1,4 @@
 import {
-  createContext,
-  useContext,
   useEffect,
   useMemo,
   useCallback,
@@ -15,15 +13,7 @@ import {
   subscribeAccessToken,
 } from "@/shared/api/axiosInstance";
 import { getCsrfToken } from "@/shared/lib/cookies";
-
-type AuthContextValue = {
-  token: string | null;
-  isAuthReady: boolean;
-  setToken: (token: string | null) => void;
-  logout: () => Promise<void>;
-};
-
-const AuthContext = createContext<AuthContextValue | null>(null);
+import { AuthContext, type AuthContextValue } from "@/app/providers/auth-context";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
@@ -64,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await logoutRequest();
     } catch {
-      // ignore logout errors
+      return;
     } finally {
       setAccessToken(null);
       queryClient.clear();
@@ -82,13 +72,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-  return ctx;
 };

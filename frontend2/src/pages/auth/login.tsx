@@ -41,7 +41,8 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="absolute inset-0 -z-10 be-app-bg" />
       <Card className="w-full max-w-md">
         <CardHeader className="flex items-center gap-2">
           <BookOpen className="size-6 text-primary" />

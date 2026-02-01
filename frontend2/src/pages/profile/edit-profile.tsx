@@ -112,7 +112,7 @@ const EditProfileForm = ({
       }
       onSuccess();
     } catch {
-      // ignore errors for now
+      return;
     }
   };
 

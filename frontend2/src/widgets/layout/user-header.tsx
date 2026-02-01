@@ -3,7 +3,7 @@ import { BookOpen, Heart, LogOut, Map, Menu, MessageSquare, Plus, Search, User a
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { useProfileQuery } from "@/entities/profile/model/hooks";
-import { useAuth } from "@/app/providers/auth-provider";
+import { useAuth } from "@/app/providers/use-auth";
 import { Avatar } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";

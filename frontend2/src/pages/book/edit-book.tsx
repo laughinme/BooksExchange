@@ -155,7 +155,7 @@ const EditBookForm = ({
 
       onSuccess();
     } catch {
-      // ignore errors for now
+      return;
     }
   };
 

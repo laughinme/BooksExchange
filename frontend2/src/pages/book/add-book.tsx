@@ -91,7 +91,7 @@ export const AddBookPage = () => {
       }
       navigate("/home");
     } catch {
-      // ignore; UI will stay
+      return;
     }
   };
 
