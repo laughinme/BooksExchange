@@ -8,13 +8,29 @@ import {
   type UpdateBookPayload,
 } from "@/entities/book/model/types";
 
+const pickAllowedFilters = (params: BookFilters) => {
+  const { query, limit, sort, genre, distance, rating } = params;
+  return {
+    query: query ?? "",
+    ...(limit !== undefined ? { limit } : {}),
+    ...(sort ? { sort } : {}),
+    ...(genre ? { genre } : {}),
+    ...(distance ? { distance } : {}),
+    ...(rating ? { rating } : {}),
+  };
+};
+
 export const bookApi = {
   getForYou: async (params: BookFilters) => {
-    const { data } = await apiPrivate.get<BookDto[]>("/books/for_you", { params });
+    const { data } = await apiPrivate.get<BookDto[]>("/books/for_you", {
+      params: pickAllowedFilters(params),
+    });
     return data;
   },
   getAll: async (params?: BookFilters) => {
-    const { data } = await apiPrivate.get<BookDto[]>("/books/", { params });
+    const { data } = await apiPrivate.get<BookDto[]>("/books/", {
+      params: params ? pickAllowedFilters(params) : undefined,
+    });
     return data;
   },
   getMine: async () => {

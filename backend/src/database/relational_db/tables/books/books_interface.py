@@ -63,14 +63,19 @@ class BooksInterface:
         lon: float | None,
         limit: int,
         search: str | None = None,
+        sort: str | None = None,
+        genre: str | None = None,
+        max_distance: float | None = None,
+        min_rating: float | None = None,
     ) -> list[Book]:
         w_geo, w_pop, w_rec, w_int = 1.0, 2.0, 1.5, 1.0
         fresh_period = 3
         score = 0
 
+        distance_expr = None
         if lat is not None and lon is not None:
-            dist_km = dist_expression(ExchangeLocation, lat, lon)
-            geo_score = func.least(10 / (1 + dist_km), 10)
+            distance_expr = dist_expression(ExchangeLocation, lat, lon)
+            geo_score = func.least(10 / (1 + distance_expr), 10)
             score += w_geo * geo_score
 
         popularity_score = func.log(1 + BookStats.views + BookStats.likes * 3 + BookStats.reserves * 4)
@@ -95,8 +100,6 @@ class BooksInterface:
                 Book.is_publicly_visible,
                 Book.owner_id != user.id,
             )
-            .order_by(score.desc())
-            .limit(limit)
         )
         if search:
             pattern = f"%{search}%"
@@ -105,20 +108,91 @@ class BooksInterface:
                 | Author.name.ilike(pattern)
                 | Genre.name.ilike(pattern)
             )
+        if genre:
+            if genre.isdigit():
+                stmt = stmt.where(Book.genre_id == int(genre))
+            else:
+                stmt = stmt.where(Genre.name.ilike(f"%{genre}%"))
+        if distance_expr is not None and max_distance is not None:
+            stmt = stmt.where(distance_expr <= max_distance)
+
+        rating_expr = func.least(func.coalesce(BookStats.likes, 0) / 10.0, 5.0)
+        if min_rating is not None:
+            stmt = stmt.where(rating_expr >= min_rating)
+
         if user.language_code is not None:
             stmt = stmt.where(Book.language_code == user.language_code)
         if user.city_id is not None:
             stmt = stmt.where(ExchangeLocation.city_id == user.city_id)
 
+        # Sorting
+        if sort == "distance" and distance_expr is not None:
+            stmt = stmt.order_by(distance_expr.asc(), Book.created_at.desc())
+        elif sort == "rating":
+            stmt = stmt.order_by(rating_expr.desc(), Book.created_at.desc())
+        elif sort == "newest":
+            stmt = stmt.order_by(Book.created_at.desc())
+        else:
+            stmt = stmt.order_by(score.desc())
+
+        stmt = stmt.limit(limit)
+
         books = await self.session.scalars(stmt)
 
         return list(books.all())
     
-    async def list_books(self) -> list[Book]:
-        books = await self.session.scalars(
+    async def list_books(
+        self,
+        user: User,
+        limit: int,
+        search: str | None = None,
+        sort: str | None = None,
+        genre: str | None = None,
+        max_distance: float | None = None,
+        min_rating: float | None = None,
+    ) -> list[Book]:
+        lat = user.latitude
+        lon = user.longitude
+        distance_expr = dist_expression(ExchangeLocation, lat, lon) if lat is not None and lon is not None else None
+        rating_expr = func.least(func.coalesce(BookStats.likes, 0) / 10.0, 5.0)
+
+        stmt = (
             select(Book)
+            .join(ExchangeLocation)
+            .join(Author)
+            .join(Genre)
+            .outerjoin(BookStats, Book.id == BookStats.book_id)
             .where(Book.is_publicly_visible)
         )
+
+        if search:
+            pattern = f"%{search}%"
+            stmt = stmt.where(
+                Book.title.ilike(pattern)
+                | Author.name.ilike(pattern)
+                | Genre.name.ilike(pattern)
+            )
+        if genre:
+            if genre.isdigit():
+                stmt = stmt.where(Book.genre_id == int(genre))
+            else:
+                stmt = stmt.where(Genre.name.ilike(f"%{genre}%"))
+
+        if distance_expr is not None and max_distance is not None:
+            stmt = stmt.where(distance_expr <= max_distance)
+        if min_rating is not None:
+            stmt = stmt.where(rating_expr >= min_rating)
+
+        if sort == "distance" and distance_expr is not None:
+            stmt = stmt.order_by(distance_expr.asc(), Book.created_at.desc())
+        elif sort == "rating":
+            stmt = stmt.order_by(rating_expr.desc(), Book.created_at.desc())
+        else:
+            stmt = stmt.order_by(Book.created_at.desc())
+
+        stmt = stmt.limit(limit)
+
+        books = await self.session.scalars(stmt)
         return list(books.all())
 
     async def list_user_books(self, user_id: UUID, limit: int) -> list[Book]:

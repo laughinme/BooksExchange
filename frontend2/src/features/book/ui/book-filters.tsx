@@ -22,7 +22,14 @@ export const BookFiltersPanel = ({ value, onChange }: BookFiltersProps) => {
   };
 
   const resetFilters = () => {
-    onChange({ query: value.query ?? "", sort: "newest", genre: "all", distance: 50, rating: 1 });
+    onChange({
+      query: value.query ?? "",
+      sort: "newest",
+      genre: "all",
+      distance: 50,
+      rating: 1,
+      limit: value.limit,
+    });
   };
 
   const distanceValue = value.distance ?? 50;
@@ -32,6 +39,7 @@ export const BookFiltersPanel = ({ value, onChange }: BookFiltersProps) => {
   const ratingPercent = ((ratingValue - 1) / (5 - 1)) * 100;
   const distanceStyle: RangeStyle = { ["--be-range"]: `${distancePercent}%` };
   const ratingStyle: RangeStyle = { ["--be-range"]: `${ratingPercent}%` };
+  const limitValue = value.limit ?? 50;
 
   return (
     <Card className="border-border/70 bg-card/60">
@@ -127,6 +135,11 @@ export const BookFiltersPanel = ({ value, onChange }: BookFiltersProps) => {
             {ratingValue > 1 && (
               <span className="rounded-full border border-border/70 bg-secondary/60 px-2 py-1 text-[11px]">
                 Рейтинг от {ratingValue}
+              </span>
+            )}
+            {limitValue && (
+              <span className="rounded-full border border-border/70 bg-secondary/60 px-2 py-1 text-[11px]">
+                Лимит {limitValue}
               </span>
             )}
             <Button

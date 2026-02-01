@@ -19,9 +19,39 @@ config = Settings() # pyright: ignore[reportCallIssue]
 async def get_books(
     user: Annotated[User, Depends(auth_user)],
     svc: Annotated[BookService, Depends(get_books_service)],
-    limit: int = Query(50, description='Number of books to return'),
+    query: str = Query("", max_length=50, description="Search by title/author/genre"),
+    limit: int = Query(50, ge=1, le=200, description='Number of books to return'),
+    sort: str | None = Query(
+        None,
+        description="Sort by: newest | distance | rating",
+        pattern="^(newest|distance|rating)$"
+    ),
+    genre: str | None = Query(
+        None,
+        description="Filter by genre name or id"
+    ),
+    distance: float | None = Query(
+        None,
+        ge=0,
+        description="Max distance in km from user to exchange location"
+    ),
+    rating: float | None = Query(
+        None,
+        ge=0,
+        le=5,
+        description="Minimum rating (pseudo, based on likes)"
+    ),
 ):
-    books = await svc.list_books(user, limit)
+    books = await svc.list_books(
+        user,
+        limit,
+        filter=False,
+        query=query,
+        sort=sort,
+        genre=genre,
+        max_distance=distance,
+        min_rating=rating,
+    )
     return books
 
 

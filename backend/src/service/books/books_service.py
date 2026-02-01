@@ -139,12 +139,40 @@ class BookService:
         book.photo_urls.extend(urls)
         return book
 
-    async def list_books(self, user: User, limit: int, filter: bool = False, query: str | None = None):
+    async def list_books(
+        self,
+        user: User,
+        limit: int,
+        filter: bool = False,
+        query: str | None = None,
+        sort: str | None = None,
+        genre: str | None = None,
+        max_distance: float | None = None,
+        min_rating: float | None = None,
+    ):
         if filter:
             lat, lon = user.latitude, user.longitude
-            books = await self.books_repo.recommended_books(user, lat, lon, limit, query)
+            books = await self.books_repo.recommended_books(
+                user,
+                lat,
+                lon,
+                limit,
+                search=query,
+                sort=sort,
+                genre=genre,
+                max_distance=max_distance,
+                min_rating=min_rating,
+            )
         else:
-            books = await self.books_repo.list_books()
+            books = await self.books_repo.list_books(
+                user,
+                limit,
+                search=query,
+                sort=sort,
+                genre=genre,
+                max_distance=max_distance,
+                min_rating=min_rating,
+            )
 
         await self._apply_user_flags(books, user)
         return books
