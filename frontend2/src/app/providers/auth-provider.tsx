@@ -3,6 +3,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useCallback,
   useState,
   type ReactNode,
 } from "react";
@@ -41,7 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         const data = await refreshSession();
         setAccessToken(data.access_token);
-      } catch (error) {
+      } catch {
         setAccessToken(null);
       } finally {
         setIsAuthReady(true);
@@ -59,16 +60,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [queryClient, token]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await logoutRequest();
-    } catch (error) {
+    } catch {
       // ignore logout errors
     } finally {
       setAccessToken(null);
       queryClient.clear();
     }
-  };
+  }, [queryClient]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -83,6 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) {

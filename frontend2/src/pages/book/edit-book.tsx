@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Camera, Upload, Save } from "lucide-react";
@@ -8,11 +8,17 @@ import {
   useUpdateBook,
   useUploadBookPhotos,
 } from "@/entities/book/model/hooks";
+import { type Book } from "@/entities/book/model/types";
 import {
   useAuthorsQuery,
   useExchangeLocationsQuery,
   useGenresQuery,
 } from "@/entities/reference/model/hooks";
+import {
+  type Author,
+  type ExchangeLocation,
+  type Genre,
+} from "@/entities/reference/model/types";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
@@ -36,40 +42,85 @@ type FormValues = {
 export const EditBookPage = () => {
   const { bookId } = useParams<{ bookId: string }>();
   const navigate = useNavigate();
+  const numericBookId = bookId ? Number(bookId) : null;
+
   const { data: book, isPending, error } = useBookQuery(bookId ?? "");
   const { data: genres = [] } = useGenresQuery();
   const { data: authors = [] } = useAuthorsQuery();
   const { data: locations = [] } = useExchangeLocationsQuery(false);
 
+  if (isPending) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (error || !book || numericBookId === null) {
+    return (
+      <Card className="m-6 p-6 text-center text-destructive">
+        Не удалось загрузить книгу
+      </Card>
+    );
+  }
+
+  return (
+    <EditBookForm
+      key={book.id}
+      bookId={numericBookId}
+      book={book}
+      authors={authors}
+      genres={genres}
+      locations={locations}
+      onBack={() => navigate(-1)}
+      onSuccess={() => navigate(`/book/${book.id}`)}
+    />
+  );
+};
+
+type EditBookFormProps = {
+  bookId: number;
+  book: Book;
+  authors: Author[];
+  genres: Genre[];
+  locations: ExchangeLocation[];
+  onBack: () => void;
+  onSuccess: () => void;
+};
+
+const EditBookForm = ({
+  bookId,
+  book,
+  authors,
+  genres,
+  locations,
+  onBack,
+  onSuccess,
+}: EditBookFormProps) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
-  } = useForm<FormValues>();
+  } = useForm<FormValues>({
+    defaultValues: {
+      title: book.title,
+      description: book.description ?? "",
+      author_id: String(book.author.id),
+      genre_id: String(book.genre.id),
+      language_code: book.languageCode,
+      condition: book.condition,
+      exchange_location_id: String(book.exchangeLocation.id),
+      extra_terms: book.extraTerms ?? "",
+      pages: book.pages ? String(book.pages) : "",
+    },
+  });
 
   const updateBook = useUpdateBook();
   const uploadPhotos = useUploadBookPhotos();
 
   const [images, setImages] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (book) {
-      reset({
-        title: book.title,
-        description: book.description ?? "",
-        author_id: String(book.author.id),
-        genre_id: String(book.genre.id),
-        language_code: book.languageCode,
-        condition: book.condition,
-        exchange_location_id: String(book.exchangeLocation.id),
-        extra_terms: book.extraTerms ?? "",
-        pages: book.pages ? String(book.pages) : "",
-      });
-      setPreviews(book.photoUrls ?? []);
-    }
-  }, [book, reset]);
+  const [previews, setPreviews] = useState<string[]>(book.photoUrls ?? []);
 
   const handleImagesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []).slice(0, 3);
@@ -80,10 +131,9 @@ export const EditBookPage = () => {
   };
 
   const onSubmit = async (values: FormValues) => {
-    if (!bookId) return;
     try {
       await updateBook.mutateAsync({
-        bookId: Number(bookId),
+        bookId,
         payload: {
           title: values.title,
           description: values.description ?? undefined,
@@ -100,30 +150,14 @@ export const EditBookPage = () => {
       if (images.length > 0) {
         const formData = new FormData();
         images.forEach((file) => formData.append("files", file));
-        await uploadPhotos.mutateAsync({ bookId: Number(bookId), formData });
+        await uploadPhotos.mutateAsync({ bookId, formData });
       }
 
-      navigate(`/book/${bookId}`);
-    } catch (err) {
+      onSuccess();
+    } catch {
       // ignore errors for now
     }
   };
-
-  if (isPending) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Spinner />
-      </div>
-    );
-  }
-
-  if (error || !book) {
-    return (
-      <Card className="m-6 p-6 text-center text-destructive">
-        Не удалось загрузить книгу
-      </Card>
-    );
-  }
 
   return (
     <div className="p-4 md:p-8 space-y-6">
@@ -132,7 +166,7 @@ export const EditBookPage = () => {
           variant="ghost"
           size="sm"
           className="gap-2"
-          onClick={() => navigate(-1)}
+          onClick={onBack}
         >
           <ArrowLeft className="size-4" /> Назад
         </Button>
@@ -205,6 +239,7 @@ export const EditBookPage = () => {
                       type="radio"
                       value={condition}
                       {...register("condition")}
+                      defaultChecked={condition === book.condition}
                     />
                     {condition}
                   </label>
@@ -295,7 +330,7 @@ export const EditBookPage = () => {
         </Card>
 
         <div className="flex justify-end gap-3">
-          <Button variant="outline" type="button" onClick={() => navigate(-1)}>
+          <Button variant="outline" type="button" onClick={onBack}>
             Отмена
           </Button>
           <Button

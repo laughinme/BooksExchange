@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
@@ -9,7 +9,9 @@ import {
   useUpdateProfile,
   useUpdateProfilePicture,
 } from "@/entities/profile/model/hooks";
+import { type Profile } from "@/entities/profile/model/types";
 import { useGenresQuery } from "@/entities/reference/model/hooks";
+import { type Genre } from "@/entities/reference/model/types";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
@@ -27,29 +29,56 @@ export const EditProfilePage = () => {
   const navigate = useNavigate();
   const { data: profile, isPending } = useProfileQuery();
   const { data: genres = [] } = useGenresQuery();
+
+  if (isPending || !profile) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
+  return (
+    <EditProfileForm
+      key={profile.id}
+      profile={profile}
+      genres={genres}
+      onCancel={() => navigate(-1)}
+      onSuccess={() => navigate("/profile")}
+    />
+  );
+};
+
+type EditProfileFormProps = {
+  profile: Profile;
+  genres: Genre[];
+  onCancel: () => void;
+  onSuccess: () => void;
+};
+
+const EditProfileForm = ({
+  profile,
+  genres,
+  onCancel,
+  onSuccess,
+}: EditProfileFormProps) => {
+  const { register, handleSubmit } = useForm<FormValues>({
+    defaultValues: {
+      username: profile.username,
+      bio: profile.bio ?? "",
+    },
+  });
+
   const updateProfile = useUpdateProfile();
   const updateGenres = useUpdateFavoriteGenres();
   const updatePicture = useUpdateProfilePicture();
 
-  const { register, handleSubmit, reset } = useForm<FormValues>();
-
-  const [selectedGenres, setSelectedGenres] = useState<Set<number>>(new Set());
+  const [selectedGenres, setSelectedGenres] = useState<Set<number>>(
+    () => new Set(profile.favoriteGenres.map((g) => g.id)),
+  );
   const [genreError, setGenreError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (profile) {
-      reset({
-        username: profile.username,
-        bio: profile.bio ?? "",
-      });
-      setSelectedGenres(new Set(profile.favoriteGenres.map((g) => g.id)));
-    }
-  }, [profile, reset]);
-
-  const selectedGenresList = useMemo(
-    () => Array.from(selectedGenres.values()),
-    [selectedGenres],
-  );
+  const selectedGenresList = Array.from(selectedGenres.values());
 
   const toggleGenre = (id: number) => {
     setSelectedGenres((prev) => {
@@ -81,19 +110,11 @@ export const EditProfilePage = () => {
         formData.append("file", values.avatar[0]);
         await updatePicture.mutateAsync(formData);
       }
-      navigate("/profile");
-    } catch (err) {
+      onSuccess();
+    } catch {
       // ignore errors for now
     }
   };
-
-  if (isPending || !profile) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Spinner />
-      </div>
-    );
-  }
 
   return (
     <div className="p-4 md:p-8 space-y-6">
@@ -102,7 +123,7 @@ export const EditProfilePage = () => {
           variant="ghost"
           size="sm"
           className="gap-2"
-          onClick={() => navigate(-1)}
+          onClick={onCancel}
         >
           <ArrowLeft className="size-4" /> Назад
         </Button>
@@ -159,7 +180,7 @@ export const EditProfilePage = () => {
         </Card>
 
         <div className="flex justify-end gap-3">
-          <Button variant="outline" type="button" onClick={() => navigate(-1)}>
+          <Button variant="outline" type="button" onClick={onCancel}>
             Отмена
           </Button>
           <Button

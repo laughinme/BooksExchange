@@ -30,7 +30,7 @@ export const RegisterPage = () => {
       await registerMutation.mutateAsync(values);
       await queryClient.ensureQueryData(profileQueryOptions());
       navigate("/home", { replace: true });
-    } catch (err) {
+    } catch {
       setError("Не удалось завершить регистрацию. Попробуйте позже.");
     }
   };

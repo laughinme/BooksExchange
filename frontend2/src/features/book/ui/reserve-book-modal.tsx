@@ -29,7 +29,7 @@ export const ReserveBookModal = ({
       await reserveMutation.mutateAsync({ bookId: book.id, comment });
       onSuccess?.();
       onClose();
-    } catch (err) {
+    } catch {
       setError("Не удалось забронировать книгу. Попробуйте еще раз.");
     }
   };

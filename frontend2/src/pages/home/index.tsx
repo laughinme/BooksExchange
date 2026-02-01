@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -16,18 +16,20 @@ export const HomePage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  const queryParam = searchParams.get("query") ?? "";
+
   const [filters, setFilters] = useState<BookFilters>({
-    query: searchParams.get("query") ?? "",
+    query: queryParam,
   });
   const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
   const toggleLike = useToggleLike();
 
-  useEffect(() => {
-    const query = searchParams.get("query") ?? "";
-    setFilters((prev) => ({ ...prev, query }));
-  }, [searchParams]);
+  const effectiveFilters = useMemo(
+    () => ({ ...filters, query: queryParam }),
+    [filters, queryParam],
+  );
 
-  const { data: books = [], isPending, error } = useBooksForYou(filters);
+  const { data: books = [], isPending, error } = useBooksForYou(effectiveFilters);
 
   const selectedBook = useMemo(
     () => books.find((book) => book.id === selectedBookId) ?? null,
@@ -39,7 +41,7 @@ export const HomePage = () => {
     const nextLiked = current ? !current.isLiked : true;
 
     queryClient.setQueryData(
-      bookKeys.forYou(filters),
+      bookKeys.forYou(effectiveFilters),
       (prev?: typeof books) =>
         prev?.map((book) =>
           book.id === bookId
@@ -58,7 +60,7 @@ export const HomePage = () => {
     try {
       await toggleLike.mutateAsync(bookId);
     } catch {
-      queryClient.invalidateQueries({ queryKey: bookKeys.forYou(filters) });
+      queryClient.invalidateQueries({ queryKey: bookKeys.forYou(effectiveFilters) });
     }
   };
 
@@ -69,7 +71,7 @@ export const HomePage = () => {
           book={selectedBook}
           onClose={() => setSelectedBookId(null)}
           onSuccess={() =>
-            queryClient.invalidateQueries({ queryKey: bookKeys.forYou(filters) })
+            queryClient.invalidateQueries({ queryKey: bookKeys.forYou(effectiveFilters) })
           }
         />
       )}
@@ -82,7 +84,7 @@ export const HomePage = () => {
       </div>
 
       <div className="mb-6">
-        <BookFiltersPanel value={filters} onChange={setFilters} />
+        <BookFiltersPanel value={effectiveFilters} onChange={setFilters} />
       </div>
 
       {isPending && (

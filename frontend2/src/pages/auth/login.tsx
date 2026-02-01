@@ -35,7 +35,7 @@ export const LoginPage = () => {
         : redirectFromState || "/home";
 
       navigate(redirect, { replace: true });
-    } catch (err) {
+    } catch {
       setError("Не удалось войти. Проверьте данные и попробуйте снова.");
     }
   };

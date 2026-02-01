@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, MapPin, Edit, Book as BookIcon } from "lucide-react";
 
@@ -16,13 +15,12 @@ export const ProfilePage = () => {
   const { data: books = [], isPending: booksPending } = useMyBooks();
   const navigate = useNavigate();
 
-  const memberSince = useMemo(() => {
-    if (!profile?.createdAt) return "";
-    return new Date(profile.createdAt).toLocaleDateString("ru-RU", {
-      year: "numeric",
-      month: "long",
-    });
-  }, [profile?.createdAt]);
+  const memberSince = profile?.createdAt
+    ? new Date(profile.createdAt).toLocaleDateString("ru-RU", {
+        year: "numeric",
+        month: "long",
+      })
+    : "";
 
   if (profilePending) {
     return (

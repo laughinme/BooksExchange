@@ -7,8 +7,10 @@ import {
   useRecordBookClick,
   useToggleLike,
 } from "@/entities/book/model/hooks";
+import { type Book } from "@/entities/book/model/types";
 import { ReserveBookModal } from "@/features/book/ui/reserve-book-modal";
 import { useProfileQuery } from "@/entities/profile/model/hooks";
+import { type Profile } from "@/entities/profile/model/types";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import {
@@ -25,44 +27,12 @@ export const BookDetailPage = () => {
   const { data: book, isPending, error } = useBookQuery(bookId ?? "");
   const { data: profile } = useProfileQuery();
   const recordClick = useRecordBookClick();
-  const toggleLike = useToggleLike();
-
-  const [activeImage, setActiveImage] = useState(0);
-  const [likeCount, setLikeCount] = useState<number | undefined>(undefined);
-  const [isLiked, setIsLiked] = useState(false);
-  const [openReserve, setOpenReserve] = useState(false);
 
   useEffect(() => {
     if (bookId) {
       recordClick.mutate(Number(bookId));
     }
   }, [bookId, recordClick]);
-
-  useEffect(() => {
-    if (book) {
-      setActiveImage(0);
-      setLikeCount(book.totalLikes);
-      setIsLiked(book.isLiked);
-    }
-  }, [book]);
-
-  const isOwner = useMemo(
-    () => (book && profile ? book.owner?.id === profile.id : false),
-    [book, profile],
-  );
-
-  const handleLike = async () => {
-    if (!book) return;
-    const optimistic = !isLiked;
-    setIsLiked(optimistic);
-    setLikeCount((prev) => (prev ?? 0) + (optimistic ? 1 : -1));
-    try {
-      await toggleLike.mutateAsync(book.id);
-    } catch {
-      setIsLiked(!optimistic);
-      setLikeCount((prev) => (prev ?? 0) + (optimistic ? -1 : 1));
-    }
-  };
 
   if (isPending) {
     return (
@@ -79,6 +49,48 @@ export const BookDetailPage = () => {
       </Card>
     );
   }
+
+  return (
+    <BookDetailContent
+      key={book.id}
+      book={book}
+      profile={profile}
+      onBack={() => navigate(-1)}
+    />
+  );
+};
+
+type BookDetailContentProps = {
+  book: Book;
+  profile?: Profile;
+  onBack: () => void;
+};
+
+const BookDetailContent = ({ book, profile, onBack }: BookDetailContentProps) => {
+  const toggleLike = useToggleLike();
+  const navigate = useNavigate();
+
+  const [activeImage, setActiveImage] = useState(0);
+  const [likeCount, setLikeCount] = useState(book.totalLikes);
+  const [isLiked, setIsLiked] = useState(book.isLiked);
+  const [openReserve, setOpenReserve] = useState(false);
+
+  const isOwner = useMemo(
+    () => (book && profile ? book.owner?.id === profile.id : false),
+    [book, profile],
+  );
+
+  const handleLike = async () => {
+    const optimistic = !isLiked;
+    setIsLiked(optimistic);
+    setLikeCount((prev) => (prev ?? 0) + (optimistic ? 1 : -1));
+    try {
+      await toggleLike.mutateAsync(book.id);
+    } catch {
+      setIsLiked(!optimistic);
+      setLikeCount((prev) => (prev ?? 0) + (optimistic ? -1 : 1));
+    }
+  };
 
   const currentImage =
     book.photoUrls[activeImage] ||
@@ -97,7 +109,7 @@ export const BookDetailPage = () => {
         <Button
           variant="ghost"
           className="gap-2"
-          onClick={() => navigate(-1)}
+          onClick={onBack}
         >
           <ArrowLeft className="size-4" /> Назад
         </Button>

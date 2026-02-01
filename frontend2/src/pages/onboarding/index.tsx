@@ -86,7 +86,7 @@ export const OnboardingPage = () => {
       }
       await queryClient.invalidateQueries({ queryKey: profileQueryKey });
       navigate("/home", { replace: true });
-    } catch (err) {
+    } catch {
       // basic error handling
     }
   };

@@ -1,6 +1,5 @@
 import "leaflet/dist/leaflet.css";
 
-import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +9,7 @@ import { useProfileQuery } from "@/entities/profile/model/hooks";
 import { useExchangeLocationsQuery } from "@/entities/reference/model/hooks";
 import { Spinner } from "@/shared/ui/spinner";
 
-delete (L.Icon.Default as any).prototype._getIconUrl;
+delete (L.Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
     "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
@@ -24,21 +23,15 @@ export const MapPage = () => {
   const { data: locations = [], isPending, error } =
     useExchangeLocationsQuery(false);
 
-  const [mapCenter, setMapCenter] = useState<[number, number]>([
-    55.7558, 37.6173,
-  ]);
-  const [zoom, setZoom] = useState(10);
-
-  useEffect(() => {
-    if (!profile?.city) return;
-    const found = locations.find(
-      (loc) => loc.city.id === profile.city?.id,
-    );
-    if (found) {
-      setMapCenter([found.latitude, found.longitude]);
-      setZoom(12);
-    }
-  }, [locations, profile?.city]);
+  const defaultCenter: [number, number] = [55.7558, 37.6173];
+  const cityLocation = profile?.city
+    ? locations.find((loc) => loc.city.id === profile.city.id)
+    : undefined;
+  const mapCenter: [number, number] = cityLocation
+    ? [cityLocation.latitude, cityLocation.longitude]
+    : defaultCenter;
+  const zoom = cityLocation ? 12 : 10;
+  const mapKey = cityLocation ? `city-${cityLocation.id}` : "default";
 
   if (isPending) {
     return (
@@ -66,6 +59,7 @@ export const MapPage = () => {
         <X className="size-5" />
       </button>
       <MapContainer
+        key={mapKey}
         center={mapCenter}
         zoom={zoom}
         scrollWheelZoom

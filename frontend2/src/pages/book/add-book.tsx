@@ -90,7 +90,7 @@ export const AddBookPage = () => {
         await uploadPhotos.mutateAsync({ bookId: data.id, formData });
       }
       navigate("/home");
-    } catch (err) {
+    } catch {
       // ignore; UI will stay
     }
   };
