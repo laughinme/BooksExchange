@@ -4,6 +4,8 @@ from fastapi import APIRouter, Depends, Query, Path
 
 from domain.roles import RoleModel
 from service.users import UserService, get_user_service
+from core.security import auth_user
+from database.relational_db import User
 
 router = APIRouter()
 
@@ -31,3 +33,13 @@ async def get_role(
     role_id: UUID = Path(...),
 ):
     return await svc.get_role(role_id)
+
+@router.get(
+    path='/my',
+    response_model=list[RoleModel],
+    summary='Get current user roles'
+)
+async def get_user_roles(
+    user: Annotated[User, Depends(auth_user)],
+):
+    return user.roles

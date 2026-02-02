@@ -1,12 +1,9 @@
-from __future__ import annotations
-
+import jwt
 import hmac
 import logging
 from datetime import UTC, datetime, timedelta
 from typing import Literal
 from uuid import uuid4
-
-import jwt
 
 from core.config import Settings
 from database.redis import CacheRepo
