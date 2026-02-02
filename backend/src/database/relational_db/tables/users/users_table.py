@@ -37,7 +37,6 @@ class User(TimestampMixin, Base):
     longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     
     # Service
-    # role: Mapped[Role] = mapped_column(Enum(Role), nullable=False, default=Role.GUEST)
     is_admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
     is_onboarded: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     banned: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

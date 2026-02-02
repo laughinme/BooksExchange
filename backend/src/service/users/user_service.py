@@ -7,7 +7,8 @@ from pathlib import Path
 from fastapi import UploadFile, status, HTTPException
 
 from core.config import Settings
-from domain.users import UserPatch, GenresPatch, Gender
+from domain.users import UserPatch, Gender
+from domain.roles import RoleModel
 from database.relational_db import (
     UoW,
     UserInterface, 
@@ -17,6 +18,7 @@ from database.relational_db import (
     CitiesInterface,
     LanguagesInterface,
     RolesInterface,
+    Role
 )
 from .exceptions import IncorrectGenreId, IncorrectCityId
 
@@ -202,4 +204,12 @@ class UserService:
 
         # await self._invalidate_permissions_cache(target.id, previous_version)
         return target
+
+    async def list_roles(
+        self,
+        *,
+        search: str | None = None,
+        limit: int = 20,
+    ) -> list[Role]:
+        return await self.role_repo.list_roles(search=search, limit=limit)
 
