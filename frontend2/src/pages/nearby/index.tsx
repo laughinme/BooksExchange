@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, MapPin, User } from "lucide-react";
+import { ArrowLeft, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { useNearbyUsers } from "@/entities/profile/model/hooks";

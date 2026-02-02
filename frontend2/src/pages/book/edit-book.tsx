@@ -42,7 +42,6 @@ type FormValues = {
 export const EditBookPage = () => {
   const { bookId } = useParams<{ bookId: string }>();
   const navigate = useNavigate();
-  const numericBookId = bookId ? Number(bookId) : null;
 
   const { data: book, isPending, error } = useBookQuery(bookId ?? "");
   const { data: genres = [] } = useGenresQuery();
@@ -57,7 +56,7 @@ export const EditBookPage = () => {
     );
   }
 
-  if (error || !book || numericBookId === null) {
+  if (error || !book || !bookId) {
     return (
       <Card className="m-6 p-6 text-center text-destructive">
         Не удалось загрузить книгу
@@ -68,7 +67,7 @@ export const EditBookPage = () => {
   return (
     <EditBookForm
       key={book.id}
-      bookId={numericBookId}
+      bookId={book.id}
       book={book}
       authors={authors}
       genres={genres}
@@ -80,7 +79,7 @@ export const EditBookPage = () => {
 };
 
 type EditBookFormProps = {
-  bookId: number;
+  bookId: string;
   book: Book;
   authors: Author[];
   genres: Genre[];

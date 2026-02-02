@@ -21,7 +21,7 @@ export const HomePage = () => {
   const [filters, setFilters] = useState<BookFilters>({
     query: queryParam,
   });
-  const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
+  const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
   const toggleLike = useToggleLike();
 
   const effectiveFilters = useMemo(
@@ -36,7 +36,7 @@ export const HomePage = () => {
     [books, selectedBookId],
   );
 
-  const handleLikeToggle = async (bookId: number) => {
+  const handleLikeToggle = async (bookId: string) => {
     const current = books.find((b) => b.id === bookId);
     const nextLiked = current ? !current.isLiked : true;
 

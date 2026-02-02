@@ -6,7 +6,7 @@ import type {
 } from "@/entities/reference/model/types";
 
 export type ProfileDto = {
-  id: number;
+  id: string;
   email: string;
   username: string;
   avatar_url?: string | null;
@@ -25,7 +25,7 @@ export type ProfileDto = {
 };
 
 export type Profile = {
-  id: number;
+  id: string;
   email: string;
   username: string;
   avatarUrl?: string | null;
@@ -56,7 +56,7 @@ export type UpdateProfilePayload = {
 };
 
 export type NearbyUser = {
-  id: number;
+  id: string;
   username: string | null;
   avatarUrl: string | null;
   bio: string | null;

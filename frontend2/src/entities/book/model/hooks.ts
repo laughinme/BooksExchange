@@ -13,7 +13,7 @@ export const bookKeys = {
   all: ["books"] as const,
   forYou: (filters: BookFilters) => ["books", "for-you", filters] as const,
   allBooks: (filters?: BookFilters) => ["books", "all", filters] as const,
-  detail: (bookId: string | number) => ["books", "detail", bookId] as const,
+  detail: (bookId: string) => ["books", "detail", bookId] as const,
   mine: ["books", "mine"] as const,
 };
 
@@ -44,7 +44,7 @@ export const useMyBooks = () =>
     },
   });
 
-export const useBookQuery = (bookId: string | number) =>
+export const useBookQuery = (bookId: string) =>
   useQuery<Book>({
     queryKey: bookKeys.detail(bookId),
     queryFn: async () => {
@@ -57,7 +57,7 @@ export const useToggleLike = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (bookId: number) => bookApi.toggleLike(bookId),
+    mutationFn: (bookId: string) => bookApi.toggleLike(bookId),
     onSuccess: (_, bookId) => {
       queryClient.invalidateQueries({ queryKey: bookKeys.detail(bookId) });
       queryClient.invalidateQueries({ queryKey: bookKeys.all });
@@ -74,7 +74,7 @@ export const useReserveBook = () => {
       comment,
       meeting_time,
     }: {
-      bookId: number;
+      bookId: string;
       comment?: string;
       meeting_time?: string;
     }) => bookApi.reserve(bookId, { comment, meeting_time }),
@@ -87,7 +87,7 @@ export const useReserveBook = () => {
 
 export const useRecordBookClick = () =>
   useMutation({
-    mutationFn: (bookId: number) => bookApi.recordClick(bookId),
+    mutationFn: (bookId: string) => bookApi.recordClick(bookId),
   });
 
 export const useCreateBook = () => {
@@ -110,7 +110,7 @@ export const useUpdateBook = () => {
       bookId,
       payload,
     }: {
-      bookId: number;
+      bookId: string;
       payload: UpdateBookPayload;
     }) => bookApi.update(bookId, payload),
     onSuccess: (data) => {
@@ -131,7 +131,7 @@ export const useUploadBookPhotos = () => {
       bookId,
       formData,
     }: {
-      bookId: number;
+      bookId: string;
       formData: FormData;
     }) => bookApi.uploadPhotos(bookId, formData),
     onSuccess: (_, { bookId }) => {

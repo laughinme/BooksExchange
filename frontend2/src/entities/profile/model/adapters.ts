@@ -11,7 +11,7 @@ export const adaptProfile = (dto: ProfileDto): Profile => ({
   birthDate: dto.birth_date ?? null,
   gender: dto.gender ?? null,
   languageCode: dto.language_code ?? null,
-  public: dto.public ?? null,
+  public: dto.public ?? undefined,
   latitude: dto.latitude ?? null,
   longitude: dto.longitude ?? null,
   city: dto.city ? adaptCity(dto.city) : null,

@@ -44,19 +44,19 @@ export const AdminExchangesPage = () => {
   });
 
   const forceFinish = useMutation({
-    mutationFn: (exchangeId: number) =>
+    mutationFn: (exchangeId: string) =>
       adminApi.forceFinishExchange(exchangeId),
     onSuccess: () => exchangesQuery.refetch(),
   });
 
   const forceCancel = useMutation({
-    mutationFn: (exchangeId: number) =>
+    mutationFn: (exchangeId: string) =>
       adminApi.forceCancelExchange(exchangeId),
     onSuccess: () => exchangesQuery.refetch(),
   });
 
   const loadDetail = useMutation({
-    mutationFn: (exchangeId: number) => adminApi.getExchange(exchangeId),
+    mutationFn: (exchangeId: string) => adminApi.getExchange(exchangeId),
     onSuccess: (dto) => setSelected(adaptExchange(dto)),
   });
 

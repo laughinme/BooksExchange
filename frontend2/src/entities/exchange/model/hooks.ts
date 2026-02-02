@@ -38,7 +38,7 @@ export const useExchangeAction = () => {
       payload,
     }: {
       action: "accept" | "decline" | "cancel" | "finish";
-      exchangeId: number;
+      exchangeId: string;
       payload?: ExchangeActionPayload;
     }) => {
       switch (action) {

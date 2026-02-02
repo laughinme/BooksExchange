@@ -28,7 +28,7 @@ export const UsersPage = () => {
   });
 
   const toggleBan = useMutation({
-    mutationFn: ({ userId, banned }: { userId: number; banned: boolean }) =>
+    mutationFn: ({ userId, banned }: { userId: string; banned: boolean }) =>
       adminApi.setUserBan(userId, banned),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });

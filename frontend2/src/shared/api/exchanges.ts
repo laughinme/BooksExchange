@@ -19,36 +19,36 @@ export const exchangeApi = {
     const { data } = await apiPrivate.get<ExchangeDto[]>("/exchanges/requested", { params });
     return data;
   },
-  getById: async (exchangeId: number | string) => {
+  getById: async (exchangeId: string) => {
     const { data } = await apiPrivate.get<ExchangeDto>(`/exchanges/${exchangeId}/`);
     return data;
   },
-  edit: async (exchangeId: number, payload: { meeting_time?: string | null }) => {
+  edit: async (exchangeId: string, payload: { meeting_time?: string | null }) => {
     const { data } = await apiPrivate.patch<ExchangeDto>(
       `/exchanges/${exchangeId}/`,
       payload,
     );
     return data;
   },
-  accept: async (exchangeId: number) => {
+  accept: async (exchangeId: string) => {
     const { data } = await apiPrivate.patch<ExchangeDto>(`/exchanges/${exchangeId}/accept`);
     return data;
   },
-  decline: async (exchangeId: number, payload?: ExchangeActionPayload) => {
+  decline: async (exchangeId: string, payload?: ExchangeActionPayload) => {
     const { data } = await apiPrivate.patch<ExchangeDto>(
       `/exchanges/${exchangeId}/decline`,
       payload,
     );
     return data;
   },
-  cancel: async (exchangeId: number, payload?: ExchangeActionPayload) => {
+  cancel: async (exchangeId: string, payload?: ExchangeActionPayload) => {
     const { data } = await apiPrivate.patch<ExchangeDto>(
       `/exchanges/${exchangeId}/cancel`,
       payload,
     );
     return data;
   },
-  finish: async (exchangeId: number) => {
+  finish: async (exchangeId: string) => {
     const { data } = await apiPrivate.patch<ExchangeDto>(`/exchanges/${exchangeId}/finish`);
     return data;
   },

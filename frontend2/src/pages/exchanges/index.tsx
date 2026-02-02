@@ -30,16 +30,17 @@ const ExchangeCard = ({
   exchange,
   type,
   onAction,
+  onInfo,
 }: {
   exchange: Exchange;
-  type: "owned" | "requested";
+  type: "owned" | "requested" | "all";
   onAction: (
     action: "accept" | "decline" | "cancel" | "finish",
-    exchangeId: number,
+    exchangeId: string,
   ) => void;
-  onInfo?: (exchangeId: number) => void;
+  onInfo?: (exchangeId: string) => void;
 }) => {
-  const partner = type === "owned" ? exchange.requester : exchange.owner;
+  const partner = type === "requested" ? exchange.owner : exchange.requester;
 
   return (
     <Card className="flex gap-4 p-4">
@@ -101,7 +102,7 @@ const ExchangeCard = ({
               Отменить запрос
             </Button>
           )}
-          {exchange.progress === "accepted" && (
+          {exchange.progress === "accepted" && type !== "all" && (
             <>
               <Button
                 size="sm"
@@ -138,7 +139,7 @@ export const ExchangesPage = () => {
   const [tab, setTab] = useState<"owned" | "requested" | "all">("owned");
   const [reasonModal, setReasonModal] = useState<{
     open: boolean;
-    exchangeId: number | null;
+    exchangeId: string | null;
     action: "decline" | "cancel" | null;
   }>({ open: false, exchangeId: null, action: null });
   const [reasonText, setReasonText] = useState("");
@@ -150,7 +151,7 @@ export const ExchangesPage = () => {
 
   const handleAction = async (
     actionType: "accept" | "decline" | "cancel" | "finish",
-    exchangeId: number,
+    exchangeId: string,
   ) => {
     let payload: ExchangeActionPayload | undefined;
     if (actionType === "decline" || actionType === "cancel") {

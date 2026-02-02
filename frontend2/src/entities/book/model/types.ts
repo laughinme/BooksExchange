@@ -8,21 +8,21 @@ import type {
 } from "@/entities/reference/model/types";
 
 export type UserSummaryDto = {
-  id: number;
+  id: string;
   username: string;
   email?: string;
   avatar_url?: string | null;
 };
 
 export type UserSummary = {
-  id: number;
+  id: string;
   username: string;
   email?: string;
   avatarUrl?: string | null;
 };
 
 export type BookDto = {
-  id: number;
+  id: string;
   title: string;
   description?: string | null;
   extra_terms?: string | null;
@@ -44,7 +44,7 @@ export type BookDto = {
 };
 
 export type Book = {
-  id: number;
+  id: string;
   title: string;
   description?: string | null;
   extraTerms?: string | null;

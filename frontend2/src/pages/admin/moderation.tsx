@@ -19,17 +19,17 @@ export const ModerationPage = () => {
   });
 
   const acceptMutation = useMutation({
-    mutationFn: (bookId: number) => adminApi.acceptBook(bookId),
+    mutationFn: (bookId: string) => adminApi.acceptBook(bookId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "books", "pending"] }),
   });
 
   const rejectMutation = useMutation({
-    mutationFn: ({ bookId, reason }: { bookId: number; reason?: string }) =>
+    mutationFn: ({ bookId, reason }: { bookId: string; reason?: string }) =>
       adminApi.rejectBook(bookId, reason),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "books", "pending"] }),
   });
 
-  const handleReject = (bookId: number) => {
+  const handleReject = (bookId: string) => {
     const reason = window.prompt("Укажите причину отклонения") || "";
     rejectMutation.mutate({ bookId, reason });
   };

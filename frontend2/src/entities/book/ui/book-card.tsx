@@ -9,7 +9,7 @@ type BookCardProps = {
   book: Book;
   onSelect?: () => void;
   onReserve?: () => void;
-  onLikeToggle?: (bookId: number) => void;
+  onLikeToggle?: (bookId: string) => void;
   showStatus?: boolean;
   likePending?: boolean;
 };

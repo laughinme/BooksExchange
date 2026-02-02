@@ -8,7 +8,7 @@ export type ExchangeProgress =
   | "canceled";
 
 export type ExchangeDto = {
-  id: number;
+  id: string;
   book: BookDto;
   owner: UserSummaryDto;
   requester: UserSummaryDto;
@@ -18,7 +18,7 @@ export type ExchangeDto = {
 };
 
 export type Exchange = {
-  id: number;
+  id: string;
   book: Book;
   owner: UserSummary;
   requester: UserSummary;
