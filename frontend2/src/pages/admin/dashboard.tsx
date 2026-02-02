@@ -9,9 +9,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Library, Clock, Users, BarChart3 } from "lucide-react";
+import { BookOpen, Clock, Library, Repeat, Users, BarChart3 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { adminApi } from "@/shared/api/admin";
+import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Spinner } from "@/shared/ui/spinner";
 import type { AdminBookStatsPoint } from "@/entities/admin/model/types";
@@ -35,9 +37,9 @@ const StatCard = ({
   title: string;
   value: string | number;
 }) => (
-  <Card className="flex flex-col">
+  <Card className="flex flex-col be-shadow-none be-backdrop-none">
     <CardContent className="flex flex-1 flex-col gap-3 p-4">
-      <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+      <div className="flex size-10 items-center justify-center rounded-lg border border-border/70 bg-muted/30 text-primary be-shadow-none">
         {icon}
       </div>
       <div>
@@ -110,7 +112,35 @@ export const DashboardPage = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Панель управления</h1>
+      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Панель управления</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Метрики и действия для модерации, пользователей и обменов.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button asChild size="sm" variant="outline" className="gap-2 be-shadow-none">
+            <Link to="/admin/books">
+              <BookOpen className="size-4" />
+              Модерация
+            </Link>
+          </Button>
+          <Button asChild size="sm" variant="outline" className="gap-2 be-shadow-none">
+            <Link to="/admin/users">
+              <Users className="size-4" />
+              Пользователи
+            </Link>
+          </Button>
+          <Button asChild size="sm" variant="outline" className="gap-2 be-shadow-none">
+            <Link to="/admin/exchanges">
+              <Repeat className="size-4" />
+              Обмены
+            </Link>
+          </Button>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
@@ -135,56 +165,56 @@ export const DashboardPage = () => {
         />
       </div>
 
-      <Card>
+      <Card className="be-shadow-none be-backdrop-none">
         <CardHeader>
           <CardTitle>Статистика книг</CardTitle>
         </CardHeader>
         <CardContent className="h-[320px]">
           <ResponsiveContainer>
             <BarChart data={statsQuery.data?.chart}>
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="views" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="likes" fill="hsl(var(--secondary))" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="reserves" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="views" fill="var(--primary)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="likes" fill="var(--secondary)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="reserves" fill="var(--accent)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
+        <Card className="be-shadow-none be-backdrop-none">
           <CardHeader>
             <CardTitle>Активные пользователи (30 дней)</CardTitle>
           </CardHeader>
           <CardContent className="h-[280px]">
             <ResponsiveContainer>
               <BarChart data={activeUsersChart}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" fill="var(--primary)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="be-shadow-none be-backdrop-none">
           <CardHeader>
             <CardTitle>Новые регистрации (30 дней)</CardTitle>
           </CardHeader>
           <CardContent className="h-[280px]">
             <ResponsiveContainer>
               <BarChart data={registrationsChart}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="count" fill="hsl(var(--secondary))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" fill="var(--secondary)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

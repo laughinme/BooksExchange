@@ -5,8 +5,9 @@ import { adminApi } from "@/shared/api/admin";
 import { adaptBook } from "@/entities/book/model/adapters";
 import { type Book } from "@/entities/book/model/types";
 import { Button } from "@/shared/ui/button";
-import { Card } from "@/shared/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Spinner } from "@/shared/ui/spinner";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 
 export const ModerationPage = () => {
   const queryClient = useQueryClient();
@@ -44,52 +45,79 @@ export const ModerationPage = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Модерация книг</h1>
+      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Модерация книг</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Проверьте новые книги перед тем, как они попадут в каталог.
+          </p>
+        </div>
+        <div className="text-sm text-muted-foreground">
+          На проверке:{" "}
+          <span className="font-semibold text-foreground">{booksQuery.data?.length ?? 0}</span>
+        </div>
+      </div>
 
-      <Card className="overflow-hidden">
-        {booksQuery.data && booksQuery.data.length > 0 ? (
-          <div className="divide-y">
-            {booksQuery.data.map((book: Book) => (
-              <div
-                key={book.id}
-                className="grid grid-cols-1 gap-3 px-4 py-3 md:grid-cols-4 md:items-center"
-              >
-                <div className="col-span-2">
-                  <p className="font-semibold">{book.title}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {book.author.name}
-                  </p>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Владелец: {book.owner?.username || book.owner?.email}
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => acceptMutation.mutate(book.id)}
-                  >
-                    <CheckCircle className="mr-2 size-4" />
-                    Одобрить
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleReject(book.id)}
-                  >
-                    <XCircle className="mr-2 size-4" />
-                    Отклонить
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="p-10 text-center text-muted-foreground">
-            <ShieldCheck className="mx-auto mb-3 size-8" />
-            Все книги проверены
-          </div>
-        )}
+      <Card className="be-shadow-none be-backdrop-none">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-base">Очередь модерации</CardTitle>
+          <CardDescription>Показываем до 50 книг в статусе “pending”.</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          {booksQuery.data && booksQuery.data.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Книга</TableHead>
+                  <TableHead>Владелец</TableHead>
+                  <TableHead className="text-right">Действия</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {booksQuery.data.map((book: Book) => (
+                  <TableRow key={book.id}>
+                    <TableCell>
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-foreground">{book.title}</p>
+                        <p className="truncate text-sm text-muted-foreground">{book.author.name}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {book.owner?.username || book.owner?.email || "—"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="be-shadow-none"
+                          onClick={() => acceptMutation.mutate(book.id)}
+                        >
+                          <CheckCircle className="size-4" />
+                          <span className="hidden sm:inline">Одобрить</span>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="be-shadow-none"
+                          onClick={() => handleReject(book.id)}
+                        >
+                          <XCircle className="size-4" />
+                          <span className="hidden sm:inline">Отклонить</span>
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="p-10 text-center text-muted-foreground">
+              <ShieldCheck className="mx-auto mb-3 size-8" />
+              Все книги проверены
+            </div>
+          )}
+        </CardContent>
       </Card>
     </div>
   );
