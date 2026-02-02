@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { Calendar, MapPin, Edit, Book as BookIcon } from "lucide-react";
+import { Calendar, MapPin, Edit, Book as BookIcon, LayoutDashboard } from "lucide-react";
 
 import { BookCard } from "@/entities/book/ui/book-card";
 import { useMyBooks } from "@/entities/book/model/hooks";
 import { useProfileQuery } from "@/entities/profile/model/hooks";
+import { useHasRole } from "@/shared/authz";
 import { Avatar } from "@/shared/ui/avatar";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
@@ -14,6 +15,7 @@ export const ProfilePage = () => {
   const { data: profile, isPending: profilePending } = useProfileQuery();
   const { data: books = [], isPending: booksPending } = useMyBooks();
   const navigate = useNavigate();
+  const isAdmin = useHasRole("admin");
 
   const memberSince = profile?.createdAt
     ? new Date(profile.createdAt).toLocaleDateString("ru-RU", {
@@ -83,13 +85,24 @@ export const ProfilePage = () => {
             <p className="text-sm">
               {profile.bio || "Информация о себе не заполнена."}
             </p>
-            <Button
-              className="w-full gap-2"
-              variant="secondary"
-              onClick={() => navigate("/profile/edit")}
-            >
-              <Edit className="size-4" /> Редактировать
-            </Button>
+            <div className="space-y-2">
+              <Button
+                className="w-full gap-2"
+                variant="secondary"
+                onClick={() => navigate("/profile/edit")}
+              >
+                <Edit className="size-4" /> Редактировать
+              </Button>
+              {isAdmin && (
+                <Button
+                  className="w-full gap-2"
+                  variant="outline"
+                  onClick={() => navigate("/admin")}
+                >
+                  <LayoutDashboard className="size-4" /> Админ-панель
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
 

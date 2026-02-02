@@ -14,6 +14,17 @@ import { Library, Clock, Users, BarChart3 } from "lucide-react";
 import { adminApi } from "@/shared/api/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Spinner } from "@/shared/ui/spinner";
+import type { AdminBookStatsPoint } from "@/entities/admin/model/types";
+
+type DailyCountPoint = { day: string; count: number };
+type DashboardStats = {
+  pendingModeration: number;
+  totalUsers: number;
+  activeExchanges: number;
+  chart: { name: string; views: number; likes: number; reserves: number }[];
+  activeUsers: DailyCountPoint[];
+  registrations: DailyCountPoint[];
+};
 
 const StatCard = ({
   icon,
@@ -38,9 +49,9 @@ const StatCard = ({
 );
 
 export const DashboardPage = () => {
-  const statsQuery = useQuery({
+  const statsQuery = useQuery<DashboardStats>({
     queryKey: ["admin", "dashboard"],
-    queryFn: async () => {
+    queryFn: async (): Promise<DashboardStats> => {
       const [
         booksPending,
         usersPage,
@@ -64,7 +75,7 @@ export const DashboardPage = () => {
           : 0,
         totalUsers: usersPage?.items?.length ?? 0,
         activeExchanges: exchangesPage?.items?.length ?? 0,
-        chart: (booksStats || []).map((p) => ({
+        chart: (booksStats || []).map((p: AdminBookStatsPoint) => ({
           name: new Date(p.day).toLocaleDateString("ru-RU", {
             day: "2-digit",
             month: "2-digit",
@@ -73,8 +84,8 @@ export const DashboardPage = () => {
           likes: p.likes,
           reserves: p.reserves,
         })),
-        activeUsers: activeUsers || [],
-        registrations: registrations || [],
+        activeUsers: (activeUsers as DailyCountPoint[] | undefined) ?? [],
+        registrations: (registrations as DailyCountPoint[] | undefined) ?? [],
       };
     },
   });
@@ -86,6 +97,16 @@ export const DashboardPage = () => {
       </div>
     );
   }
+
+  const activeUsersChart = (statsQuery.data?.activeUsers ?? []).map((p) => ({
+    name: new Date(p.day).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" }),
+    count: p.count,
+  }));
+
+  const registrationsChart = (statsQuery.data?.registrations ?? []).map((p) => ({
+    name: new Date(p.day).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" }),
+    count: p.count,
+  }));
 
   return (
     <div className="space-y-6">
@@ -141,10 +162,7 @@ export const DashboardPage = () => {
           </CardHeader>
           <CardContent className="h-[280px]">
             <ResponsiveContainer>
-              <BarChart data={statsQuery.data?.activeUsers.map((p: any) => ({
-                name: new Date(p.day).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" }),
-                count: p.count,
-              }))}>
+              <BarChart data={activeUsersChart}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
@@ -161,10 +179,7 @@ export const DashboardPage = () => {
           </CardHeader>
           <CardContent className="h-[280px]">
             <ResponsiveContainer>
-              <BarChart data={statsQuery.data?.registrations.map((p: any) => ({
-                name: new Date(p.day).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" }),
-                count: p.count,
-              }))}>
+              <BarChart data={registrationsChart}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />

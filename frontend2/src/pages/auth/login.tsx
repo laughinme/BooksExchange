@@ -1,9 +1,13 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { BookOpen } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { useLogin } from "@/features/auth/model/hooks";
+import { profileQueryKey } from "@/entities/profile/model/hooks";
+import type { Profile } from "@/entities/profile/model/types";
+import { hasRole } from "@/shared/authz";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
@@ -20,6 +24,7 @@ export const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const onSubmit = async (values: FormValues) => {
     setError(null);
@@ -27,12 +32,15 @@ export const LoginPage = () => {
       await loginMutation.mutateAsync(values);
       const redirectFromState =
         (location.state as { from?: Location })?.from?.pathname;
-      const adminLogin =
-        values.email === "admin@example.com" && values.password === "admin";
 
-      const redirect = adminLogin
-        ? "/"
-        : redirectFromState || "/home";
+      const profile = queryClient.getQueryData<Profile>(profileQueryKey);
+      const isAdmin = hasRole(profile?.roles, "admin");
+
+      const isAdminRouteRequested = redirectFromState?.startsWith("/admin");
+      const redirect = (() => {
+        if (isAdminRouteRequested) return isAdmin ? "/admin" : "/home";
+        return redirectFromState || "/home";
+      })();
 
       navigate(redirect, { replace: true });
     } catch {
