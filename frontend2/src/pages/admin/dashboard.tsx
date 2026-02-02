@@ -110,6 +110,8 @@ export const DashboardPage = () => {
     count: p.count,
   }));
 
+  const legendStyle = { color: "var(--foreground)", fontWeight: 600, letterSpacing: "0.01em" };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
@@ -176,10 +178,10 @@ export const DashboardPage = () => {
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Legend />
-              <Bar dataKey="views" fill="var(--primary)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="likes" fill="var(--secondary)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="reserves" fill="var(--accent)" radius={[4, 4, 0, 0]} />
+              <Legend iconType="square" iconSize={14} wrapperStyle={legendStyle} />
+              <Bar dataKey="views" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="likes" fill="var(--chart-3)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="reserves" fill="var(--chart-2)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>

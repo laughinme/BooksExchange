@@ -112,7 +112,7 @@ export const UserHeader = () => {
             variant="ghost"
             size="sm"
             className={cn(
-              "flex items-center gap-2 rounded-full px-2 hover:bg-accent/70 border border-transparent",
+              "flex h-10 items-center gap-2 rounded-full px-3 hover:bg-accent/70 border border-transparent",
               menuOpen && "bg-accent/60 border-border/60",
             )}
             onClick={() => setMenuOpen((prev) => !prev)}
