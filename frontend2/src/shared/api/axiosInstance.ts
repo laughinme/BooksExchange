@@ -8,7 +8,7 @@ import { clearCookie, getCsrfToken } from "@/shared/lib/cookies";
 
 const BASE_URL = import.meta.env.DEV
   ? "/api/v1"
-  : "https://hackathon-backend.fly.dev/api/v1";
+  : "https://books-exchange.fly.dev/api/v1";
 
 export const apiPublic = axios.create({
   baseURL: BASE_URL,
@@ -18,6 +18,37 @@ export const apiPublic = axios.create({
   },
   withCredentials: true,
 });
+
+type RefreshResponse = { access_token: string };
+
+let refreshPromise: Promise<RefreshResponse> | null = null;
+
+export const refreshAccessToken = () => {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  const csrfToken = getCsrfToken();
+  if (!csrfToken) {
+    return Promise.reject(new Error("Missing CSRF token"));
+  }
+
+  refreshPromise = apiPublic
+    .post<RefreshResponse>(
+      "/auth/refresh",
+      {},
+      {
+        headers: { "x-csrf-token": csrfToken },
+        withCredentials: true,
+      },
+    )
+    .then((res) => res.data)
+    .finally(() => {
+      refreshPromise = null;
+    });
+
+  return refreshPromise;
+};
 
 let accessToken: string | null = null;
 const tokenSubscribers = new Set<(token: string | null) => void>();
@@ -81,21 +112,9 @@ apiPrivate.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const csrfToken = getCsrfToken();
-        if (!csrfToken) {
-          throw new Error("Missing CSRF token");
-        }
+        const refreshResponse = await refreshAccessToken();
 
-        const refreshResponse = await apiPublic.post<{ access_token: string }>(
-          "/auth/refresh",
-          {},
-          {
-            headers: { "x-csrf-token": csrfToken },
-            withCredentials: true,
-          },
-        );
-
-        const newToken = refreshResponse.data.access_token;
+        const newToken = refreshResponse.access_token;
         setAccessToken(newToken);
 
         if (!originalRequest.headers) {
@@ -110,7 +129,7 @@ apiPrivate.interceptors.response.use(
       } catch (refreshError) {
         setAccessToken(null);
         clearCookie("refresh_token");
-        clearCookie("fastapi-csrf-token");
+        clearCookie("csrf_token");
         return Promise.reject(refreshError);
       }
     }

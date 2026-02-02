@@ -1,5 +1,4 @@
-import { apiPrivate, apiPublic } from "@/shared/api/axiosInstance";
-import { getCsrfToken } from "@/shared/lib/cookies";
+import { apiPrivate, apiPublic, refreshAccessToken } from "@/shared/api/axiosInstance";
 
 export type AuthResponseDto = {
   access_token: string;
@@ -23,19 +22,6 @@ export const loginRequest = (payload: LoginPayload) =>
 export const registerRequest = (payload: RegisterPayload) =>
   apiPublic.post<AuthResponseDto>("/auth/register", payload).then((res) => res.data);
 
-export const refreshSession = () => {
-  const csrfToken = getCsrfToken();
-
-  return apiPublic
-    .post<AuthResponseDto>(
-      "/auth/refresh",
-      {},
-      {
-        headers: csrfToken ? { "x-csrf-token": csrfToken } : undefined,
-        withCredentials: true,
-      },
-    )
-    .then((res) => res.data);
-};
+export const refreshSession = () => refreshAccessToken();
 
 export const logoutRequest = () => apiPrivate.post("/auth/logout").then((res) => res.data);
