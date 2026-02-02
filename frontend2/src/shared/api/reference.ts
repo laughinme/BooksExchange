@@ -1,3 +1,5 @@
+import { AxiosError } from "axios";
+
 import { apiPrivate } from "@/shared/api/axiosInstance";
 
 import {
@@ -37,10 +39,17 @@ export const referenceApi = {
     return data;
   },
   getNearestExchangeLocation: async () => {
-    const { data } = await apiPrivate.get<ExchangeLocationDto>(
-      "/geo/exchange_locations/nearest",
-    );
-    return data;
+    try {
+      const { data } = await apiPrivate.get<ExchangeLocationDto>(
+        "/geo/exchange_locations/nearest",
+      );
+      return data;
+    } catch (err) {
+      if (err instanceof AxiosError && err.response?.status === 412) {
+        return null;
+      }
+      throw err;
+    }
   },
   getGenreById: async (genreId: number) => {
     const { data } = await apiPrivate.get<GenreDto>(`/books/genres/${genreId}/`);

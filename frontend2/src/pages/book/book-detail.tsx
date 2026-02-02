@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, BookCheck, Heart, Info, MapPin, Share2, Eye, Edit } from "lucide-react";
 
 import {
   useBookQuery,
-  useRecordBookClick,
   useToggleLike,
 } from "@/entities/book/model/hooks";
 import { type Book } from "@/entities/book/model/types";
@@ -27,13 +26,6 @@ export const BookDetailPage = () => {
   const navigate = useNavigate();
   const { data: book, isPending, error } = useBookQuery(bookId ?? "");
   const { data: profile } = useProfileQuery();
-  const recordClick = useRecordBookClick();
-
-  useEffect(() => {
-    if (bookId) {
-      recordClick.mutate(bookId);
-    }
-  }, [bookId, recordClick]);
 
   if (isPending) {
     return (
