@@ -20,3 +20,14 @@ async def list_roles(
 ):
     return await svc.list_roles(search=search, limit=limit)
 
+
+@router.get(
+    path='/{role_id}',
+    response_model=RoleModel,
+    summary='Get a role by id'
+)
+async def get_role(
+    svc: Annotated[UserService, Depends(get_user_service)],
+    role_id: UUID = Path(...),
+):
+    return await svc.get_role(role_id)

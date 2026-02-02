@@ -213,3 +213,5 @@ class UserService:
     ) -> list[Role]:
         return await self.role_repo.list_roles(search=search, limit=limit)
 
+    async def get_role(self, role_id: UUID) -> Role | None:
+        return await self.role_repo.get_by_id(role_id)

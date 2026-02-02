@@ -1,4 +1,5 @@
 from typing import Iterable
+from uuid import UUID
 
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,7 +15,7 @@ class RolesInterface:
         self,
         *,
         search: str | None = None,
-        limit: int | None = None,
+        limit: int = 20,
     ) -> list[Role]:
         stmt = select(Role).order_by(Role.slug)
 
@@ -22,8 +23,7 @@ class RolesInterface:
             pattern = f"%{search}%"
             stmt = stmt.where(or_(Role.slug.ilike(pattern), Role.name.ilike(pattern)))
 
-        if limit:
-            stmt = stmt.limit(limit)
+        stmt = stmt.limit(limit)
 
         rows = await self.session.scalars(stmt)
         return list(rows)
@@ -32,6 +32,13 @@ class RolesInterface:
         stmt = (
             select(Role)
             .where(Role.slug == slug)
+        )
+        return await self.session.scalar(stmt)
+    
+    async def get_by_id(self, role_id: UUID) -> Role | None:
+        stmt = (
+            select(Role)
+            .where(Role.id == role_id)
         )
         return await self.session.scalar(stmt)
 
