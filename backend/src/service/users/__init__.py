@@ -7,7 +7,8 @@ from database.relational_db import (
     UserGenreInterface,
     GenresInterface,
     CitiesInterface,
-    LanguagesInterface
+    LanguagesInterface,
+    RolesInterface
 )
 from .user_service import UserService
 
@@ -20,4 +21,6 @@ async def get_user_service(
     genres_repo = GenresInterface(uow.session)
     cities_repo = CitiesInterface(uow.session)
     lang_repo = LanguagesInterface(uow.session)
-    return UserService(uow, user_repo, ug_repo, genres_repo, cities_repo, lang_repo)
+    role_repo = RolesInterface(uow.session)
+    
+    return UserService(uow, user_repo, ug_repo, genres_repo, cities_repo, lang_repo, role_repo)

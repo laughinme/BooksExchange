@@ -1,39 +1,37 @@
 from typing import Literal
-from fastapi import Request
 from sqlalchemy.exc import IntegrityError
-from passlib.context import CryptContext
 
 from database.relational_db import (
+    RolesInterface,
     UserInterface,
     User,
     UoW,
 )
-from domain.auth import UserRegister, UserLogin
+from domain.auth import UserRegister, UserLogin, DEFAULT_ROLE
 from core.config import Settings
+from core.crypto import hash_password, verify_password, needs_rehash
 from .exceptions import AlreadyExists, WrongCredentials
 from ..tokens import TokenService
 
-
 config = Settings() # pyright: ignore[reportCallIssue]
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class CredentialsService:
     def __init__(
         self,
-        request: Request,
-        user_repo: UserInterface,
-        token_service: TokenService,
         uow: UoW,
+        user_repo: UserInterface,
+        role_repo: RolesInterface,
+        token_service: TokenService,
     ):
-        self.user_repo = user_repo
-        self.token_service = token_service
         self.uow = uow
-        self.request = request
+        self.user_repo = user_repo
+        self.role_repo = role_repo
+        self.token_service = token_service
         
     @staticmethod
-    def _check_password(password: str, password_hash: bytes) -> bool:
+    async def _check_password(password: str, password_hash: str) -> bool:
         try:
-            valid = pwd_context.verify(password.encode(), password_hash)
+            valid = await verify_password(password, password_hash)
             if not valid:
                 raise WrongCredentials()
         except ValueError:
@@ -41,9 +39,9 @@ class CredentialsService:
         
         return valid
         
-    @staticmethod
-    def _hash_password(password: str) -> bytes:
-        return pwd_context.hash(password).encode()
+    # @staticmethod
+    # async def _hash_password(password: str) -> str:
+    #     return await hash_password(password)
     
     
     async def register(
@@ -52,23 +50,29 @@ class CredentialsService:
         src: Literal['web', 'mobile']
     ) -> tuple[str, str, str]:
         
-        password_hash = self._hash_password(payload.password)
+        password_hash = await hash_password(payload.password)
 
         user = User(
             email=payload.email,
             password_hash=password_hash,
             # allow_password_login=True,
-            username=payload.username
+            username=payload.username,
         )
         
-        await self.user_repo.add(user)
-        
         try:
+            await self.user_repo.add(user)
             await self.uow.session.flush()
         except IntegrityError as e:
             raise AlreadyExists()
         
-        access, refresh, csrf = await self.token_service.issue_tokens(user.id, src)
+        
+        default_role = await self.role_repo.get_by_slug(DEFAULT_ROLE.value)
+        if default_role is None:
+            raise RuntimeError("Default role is missing from the database")
+
+        await self.user_repo.assign_roles(user, [default_role])
+        
+        access, refresh, csrf = await self.token_service.issue_tokens(user, src)
         return access, refresh, csrf
     
     
@@ -81,9 +85,12 @@ class CredentialsService:
         if user is None:
             raise WrongCredentials()
 
-        self._check_password(payload.password, user.password_hash)
+        await self._check_password(payload.password, user.password_hash)
         
-        access, refresh, csrf = await self.token_service.issue_tokens(user.id, src)
+        if await needs_rehash(user.password_hash):
+            user.password_hash = await hash_password(payload.password)
+        
+        access, refresh, csrf = await self.token_service.issue_tokens(user, src)
         return access, refresh, csrf
     
     

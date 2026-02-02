@@ -1,0 +1,58 @@
+from typing import Iterable
+from uuid import UUID
+
+from sqlalchemy import or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from .roles_table import Role
+
+
+class RolesInterface:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def list_roles(
+        self,
+        *,
+        search: str | None = None,
+        limit: int = 20,
+    ) -> list[Role]:
+        stmt = select(Role).order_by(Role.slug)
+
+        if search:
+            pattern = f"%{search}%"
+            stmt = stmt.where(or_(Role.slug.ilike(pattern), Role.name.ilike(pattern)))
+
+        stmt = stmt.limit(limit)
+
+        rows = await self.session.scalars(stmt)
+        return list(rows)
+
+    async def get_by_slug(self, slug: str) -> Role | None:
+        stmt = (
+            select(Role)
+            .where(Role.slug == slug)
+        )
+        return await self.session.scalar(stmt)
+    
+    async def get_by_id(self, role_id: UUID) -> Role | None:
+        stmt = (
+            select(Role)
+            .where(Role.id == role_id)
+        )
+        return await self.session.scalar(stmt)
+
+    async def get_by_slugs(self, slugs: Iterable[str]) -> list[Role]:
+        slugs = list(dict.fromkeys(slugs))
+        if not slugs:
+            return []
+
+        stmt = (
+            select(Role)
+            .where(Role.slug.in_(slugs))
+        )
+        rows = await self.session.scalars(stmt)
+        fetched = list(rows)
+        slug_to_role = {role.slug: role for role in fetched}
+        return [slug_to_role[slug] for slug in slugs if slug in slug_to_role]
+

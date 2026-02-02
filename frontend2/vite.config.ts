@@ -17,7 +17,7 @@ export default defineConfig({
     https: {},
     proxy: {
       "/api/v1": {
-        target: "https://books-hack.fly.dev",
+        target: "https://books-exchange.fly.dev",
         changeOrigin: true,
         secure: true,
         followRedirects: true,

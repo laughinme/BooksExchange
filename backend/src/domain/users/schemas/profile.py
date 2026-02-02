@@ -1,4 +1,4 @@
-from typing import Annotated, TYPE_CHECKING
+from typing import Annotated
 from pydantic import BaseModel, Field, EmailStr, confloat, model_validator, HttpUrl, field_validator, constr
 from datetime import date
 from uuid import UUID
@@ -31,6 +31,12 @@ class UserModel(TimestampModel):
     is_onboarded: bool
     banned: bool
     public: bool = Field(..., description='Whether user wants his profile to be visible to others')
+    
+    roles: list[str] = Field(
+        alias="role_slugs",
+        default_factory=list,
+        description="User's roles."
+    )
 
 
 class UserPatch(BaseModel):

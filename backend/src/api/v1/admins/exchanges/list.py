@@ -5,7 +5,7 @@ from database.relational_db import User
 from domain.exchanges import ExchangeModel, ExchangeProgress
 from domain.common import CursorPage
 from core.config import Settings
-from core.security import auth_admin
+from core.security import require
 from service.exchanges import ExchangeService, get_exchanges_service
 
 router = APIRouter()
@@ -18,7 +18,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
     summary='List all exchanges (cursor pagination)',
 )
 async def list_exchanges(
-    _: Annotated[User, Depends(auth_admin)],
+    _: Annotated[User, Depends(require('admin'))],
     svc: Annotated[ExchangeService, Depends(get_exchanges_service)],
     status: ExchangeProgress | None = Query(None, description='Filter by exchange status'),
     limit: int = Query(50, ge=1, le=100, description='Page size'),

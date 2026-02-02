@@ -1,7 +1,7 @@
 from uuid import UUID, uuid4
 from datetime import datetime, date
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import ForeignKey, Integer, Uuid, String, Boolean, DateTime, Float, Date, false
+from sqlalchemy import ForeignKey, Integer, Uuid, String, Boolean, DateTime, Float, Date, false, Index
 from sqlalchemy.dialects.postgresql import BYTEA, ENUM
 
 from domain.users import Gender
@@ -37,11 +37,46 @@ class User(TimestampMixin, Base):
     longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     
     # Service
-    # role: Mapped[Role] = mapped_column(Enum(Role), nullable=False, default=Role.GUEST)
     is_admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
     is_onboarded: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     banned: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     public: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
+    
+    # Added new fields for JWT token versioning
+    auth_version: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=1, server_default="1"
+    )
+        
+    __table_args__ = (
+        # GIN trigram indexes for fast text search
+        Index(
+            'users_username_trgm',
+            'username',
+            postgresql_using='gin',
+            postgresql_ops={'username': 'gin_trgm_ops'}
+        ),
+        Index(
+            'users_email_trgm',
+            'email',
+            postgresql_using='gin',
+            postgresql_ops={'email': 'gin_trgm_ops'}
+        ),
+    )
+    
+    city: Mapped['City'] = relationship(lazy='selectin') # type: ignore
+    favorite_genres: Mapped[list['Genre']] = relationship( # type: ignore
+        lazy='selectin',
+        secondary='user_favorite_genres'
+    )
+    books: Mapped[list['Book']] = relationship(lazy='selectin') # type: ignore
+    
+    roles: Mapped[list["Role"]] = relationship(  # pyright: ignore
+        "Role",
+        secondary="user_roles",
+        back_populates="users",
+        lazy="selectin",
+    )
+    
     
     @property
     def age(self) -> int | None:
@@ -52,10 +87,16 @@ class User(TimestampMixin, Base):
             today.year - self.birth_date.year
             - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
         )
-    
-    city: Mapped['City'] = relationship(lazy='selectin') # type: ignore
-    favorite_genres: Mapped[list['Genre']] = relationship( # type: ignore
-        lazy='selectin',
-        secondary='user_favorite_genres'
-    )
-    books: Mapped[list['Book']] = relationship(lazy='selectin') # type: ignore
+        
+    @property
+    def role_slugs(self) -> list[str]:
+        return [role.slug for role in self.roles]
+
+    def has_roles(self, *slugs: str) -> bool:
+        if not slugs:
+            return True
+        owned = set(self.role_slugs)
+        return all(slug in owned for slug in slugs)
+
+    def bump_auth_version(self) -> None:
+        self.auth_version = (self.auth_version or 0) + 1

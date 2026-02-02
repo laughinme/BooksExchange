@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Path
 
 from domain.exchanges import ExchangeModel
 from core.config import Settings
-from core.security import auth_admin
+from core.security import require
 from service.exchanges import ExchangeService, get_exchanges_service
 from database.relational_db import User
 
@@ -19,7 +19,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 )
 async def force_finish_exchange(
     exchange_id: Annotated[UUID, Path(...)],
-    _: Annotated[User, Depends(auth_admin)],
+    _: Annotated[User, Depends(require('admin'))],
     svc: Annotated[ExchangeService, Depends(get_exchanges_service)],
 ):
     return await svc.admin_force_finish(exchange_id)
@@ -32,7 +32,7 @@ async def force_finish_exchange(
 )
 async def force_cancel_exchange(
     exchange_id: Annotated[UUID, Path(...)],
-    _: Annotated[User, Depends(auth_admin)],
+    _: Annotated[User, Depends(require('admin'))],
     svc: Annotated[ExchangeService, Depends(get_exchanges_service)],
 ):
     return await svc.admin_force_cancel(exchange_id)

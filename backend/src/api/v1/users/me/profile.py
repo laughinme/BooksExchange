@@ -1,6 +1,6 @@
 import logging
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from database.relational_db import User
 from domain.users import UserModel, UserPatch
@@ -18,7 +18,10 @@ logger = logging.getLogger(__name__)
     summary='Get user account info'
 )
 async def profile(
-    user: Annotated[User, Depends(auth_user)]
+    user: Annotated[User, Depends(auth_user)],
+    # TODO: Add expandable fields
+    # expand: Annotated[list[ExpandUserFields], Query(default_factory=list, description="Fields to expand with in the response")],
+    # svc: Annotated[UserService, Depends(get_user_service)],
 ):
     return user
 
@@ -33,6 +36,5 @@ async def update_profile(
     user: Annotated[User, Depends(auth_user)],
     svc: Annotated[UserService, Depends(get_user_service)],
 ):
-    logger.info(payload.model_dump_json())
     await svc.patch_user(payload, user)
     return user

@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 
-from core.security import auth_admin
+from core.security import require
 from database.relational_db import User
 from domain.users import UserModel, Gender
 from service.users import UserService, get_user_service
@@ -16,7 +16,7 @@ router = APIRouter()
     summary='List users with filters and search (cursor pagination)',
 )
 async def list_users(
-    _: Annotated[User, Depends(auth_admin)],
+    _: Annotated[User, Depends(require('admin'))],
     svc: Annotated[UserService, Depends(get_user_service)],
     city_id: int | None = Query(None, description='Filter by city id'),
     banned: bool | None = Query(None, description='Filter by banned status'),

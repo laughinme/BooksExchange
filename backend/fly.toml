@@ -1,12 +1,10 @@
-# fly.toml app configuration file generated for books-hack on 2025-12-06T18:29:05+07:00
+# fly.toml app configuration file generated for books-exchange on 2026-02-02T15:38:55+07:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'books-hack'
+app = 'books-exchange'
 primary_region = 'fra'
-
-[build]
 
 [http_service]
   internal_port = 8080
@@ -18,5 +16,5 @@ primary_region = 'fra'
 
 [[vm]]
   memory = '1gb'
-  cpu_kind = 'shared'
   cpus = 1
+  memory_mb = 1024
