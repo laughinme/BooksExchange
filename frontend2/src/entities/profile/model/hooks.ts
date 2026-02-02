@@ -57,6 +57,6 @@ export const useNearbyUsers = (radius_km?: number) =>
     queryKey: ["nearby-users", radius_km],
     queryFn: async () => {
       const data = await profileApi.getNearbyUsers(radius_km);
-      return data.map((dto: any) => adaptNearbyUser(dto));
+      return data.map((dto) => adaptNearbyUser(dto));
     },
   });

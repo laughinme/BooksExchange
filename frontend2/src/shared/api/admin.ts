@@ -28,6 +28,8 @@ export const adminApi = {
     apiPrivate.get<CursorPage<ProfileDto>>("/admins/users/", { params }).then((res) => res.data),
   setUserBan: (userId: string, banned: boolean) =>
     apiPrivate.post<ProfileDto>(`/admins/users/${userId}/ban`, { banned }).then((res) => res.data),
+  setUserRoles: (userId: string, roles: string[]) =>
+    apiPrivate.put<ProfileDto>(`/admins/users/${userId}/roles`, { roles }).then((res) => res.data),
 
   statsActiveUsers: (days = 30) =>
     apiPrivate.get("/admins/stats/active-users", { params: { days } }).then((res) => res.data),

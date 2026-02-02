@@ -31,7 +31,7 @@ export const profileApi = {
     return data;
   },
   getNearbyUsers: async (radius_km?: number) => {
-    const { data } = await apiPrivate.get("/users/nearby", {
+    const { data } = await apiPrivate.get<(ProfileDto & { distance: number })[]>("/users/nearby", {
       params: radius_km ? { radius_km } : undefined,
     });
     return data;

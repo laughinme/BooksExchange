@@ -12,12 +12,16 @@ export type ProfileDto = {
   avatar_url?: string | null;
   bio?: string | null;
   birth_date?: string | null;
+  age?: number | null;
   gender?: "male" | "female" | "unknown" | null;
   language_code?: string | null;
   public?: boolean;
   latitude?: number | null;
   longitude?: number | null;
+  distance?: number;
   city?: CityDto | null;
+  roles?: string[];
+  role_slugs?: string[];
   favorite_genres: GenreDto[];
   is_onboarded: boolean;
   created_at: string;
@@ -37,6 +41,7 @@ export type Profile = {
   latitude?: number | null;
   longitude?: number | null;
   city?: City | null;
+  roles: string[];
   favoriteGenres: Genre[];
   isOnboarded: boolean;
   createdAt: string;
