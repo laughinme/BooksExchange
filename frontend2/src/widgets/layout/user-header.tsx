@@ -1,5 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, Heart, LogOut, Map, Menu, MessageSquare, Plus, Search, User as UserIcon, Home } from "lucide-react";
+import {
+  BookOpen,
+  Heart,
+  LayoutDashboard,
+  LogOut,
+  Map,
+  Menu,
+  MessageSquare,
+  Plus,
+  Search,
+  User as UserIcon,
+  Home,
+} from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { useProfileQuery } from "@/entities/profile/model/hooks";
@@ -8,6 +20,7 @@ import { Avatar } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { cn } from "@/shared/lib/utils";
+import { useHasRole } from "@/shared/authz";
 
 export const UserHeader = () => {
   const { data: profile } = useProfileQuery();
@@ -16,6 +29,7 @@ export const UserHeader = () => {
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("query") ?? "");
   const [menuOpen, setMenuOpen] = useState(false);
+  const isAdmin = useHasRole("admin");
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -133,6 +147,15 @@ export const UserHeader = () => {
                 >
                   <UserIcon className="size-4" /> Профиль
                 </Link>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent/60"
+                  >
+                    <LayoutDashboard className="size-4" /> Админка
+                  </Link>
+                )}
                 <Link
                   to="/liked-books"
                   onClick={() => setMenuOpen(false)}

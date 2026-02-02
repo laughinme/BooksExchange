@@ -4,12 +4,15 @@ import { AdminSidebar } from "./admin-sidebar";
 
 export const AdminLayout = () => {
   return (
-    <div className="relative flex min-h-screen bg-background text-foreground">
-      <div className="absolute inset-0 -z-10 be-app-bg" />
-      <AdminSidebar />
-      <main className="flex-1 overflow-auto p-6">
-        <Outlet />
-      </main>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="flex min-h-screen">
+        <AdminSidebar />
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-6xl px-4 py-6 md:px-6">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

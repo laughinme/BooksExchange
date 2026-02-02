@@ -242,4 +242,12 @@
   .be-shadow-badge {
     box-shadow: 0 6px 20px -12px rgba(0, 0, 0, 0.5);
   }
+
+  .be-shadow-none {
+    box-shadow: none;
+  }
+
+  .be-backdrop-none {
+    backdrop-filter: none;
+  }
 }
