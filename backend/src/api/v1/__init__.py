@@ -9,6 +9,7 @@ def get_v1_router() -> APIRouter:
     from .geo import get_geo_router
     from .exchanges import get_exchanges_router
     from .misc import get_misc_router
+    from .roles import get_roles_router
 
     router = APIRouter(prefix='/v1')
 
@@ -19,5 +20,6 @@ def get_v1_router() -> APIRouter:
     router.include_router(get_geo_router())
     router.include_router(get_exchanges_router())
     router.include_router(get_misc_router())
+    router.include_router(get_roles_router())
     
     return router
