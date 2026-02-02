@@ -30,6 +30,7 @@ const ExchangeCard = ({
   exchange,
   type,
   onAction,
+  onInfo,
 }: {
   exchange: Exchange;
   type: "owned" | "requested";

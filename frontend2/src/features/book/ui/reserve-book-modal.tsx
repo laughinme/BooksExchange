@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { isAxiosError } from "axios";
 import { X } from "lucide-react";
 
 import { useReserveBook } from "@/entities/book/model/hooks";
@@ -38,8 +39,16 @@ export const ReserveBookModal = ({
       await reserveMutation.mutateAsync(payload);
       onSuccess?.();
       onClose();
-    } catch {
-      setError("Не удалось забронировать книгу. Попробуйте еще раз.");
+    } catch (err) {
+      const detail =
+        isAxiosError(err) && err.response?.data?.detail
+          ? err.response.data.detail
+          : null;
+      setError(
+        typeof detail === "string"
+          ? detail
+          : "Не удалось забронировать книгу. Попробуйте еще раз.",
+      );
     }
   };
 

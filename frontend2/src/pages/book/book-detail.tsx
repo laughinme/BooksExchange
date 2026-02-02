@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, BookCheck, Heart, Info, MapPin, Share2, Eye, Edit } from "lucide-react";
 
@@ -26,14 +26,19 @@ export const BookDetailPage = () => {
   const { bookId } = useParams<{ bookId: string }>();
   const navigate = useNavigate();
   const { data: book, isPending, error } = useBookQuery(bookId ?? "");
-  const { data: profile } = useProfileQuery();
-  const recordClick = useRecordBookClick();
+  const { data: profile, isPending: profilePending } = useProfileQuery();
+  const { mutate: recordBookClick } = useRecordBookClick();
+  const recordedBookIdRef = useRef<string | number | null>(null);
 
   useEffect(() => {
-    if (bookId) {
-      recordClick.mutate(Number(bookId));
-    }
-  }, [bookId, recordClick]);
+    const currentId = book?.id;
+    if (!currentId) return;
+
+    if (recordedBookIdRef.current === currentId) return;
+
+    recordedBookIdRef.current = currentId;
+    recordBookClick(currentId);
+  }, [book?.id, recordBookClick]);
 
   if (isPending) {
     return (
@@ -56,6 +61,7 @@ export const BookDetailPage = () => {
       key={book.id}
       book={book}
       profile={profile ?? undefined}
+      profilePending={profilePending}
       onBack={() => navigate(-1)}
     />
   );
@@ -64,10 +70,11 @@ export const BookDetailPage = () => {
 type BookDetailContentProps = {
   book: Book;
   profile?: Profile;
+  profilePending: boolean;
   onBack: () => void;
 };
 
-const BookDetailContent = ({ book, profile, onBack }: BookDetailContentProps) => {
+const BookDetailContent = ({ book, profile, profilePending, onBack }: BookDetailContentProps) => {
   const toggleLike = useToggleLike();
   const navigate = useNavigate();
   const authorDetails = useAuthorQuery(book.author.id);
@@ -78,10 +85,11 @@ const BookDetailContent = ({ book, profile, onBack }: BookDetailContentProps) =>
   const [isLiked, setIsLiked] = useState(book.isLiked);
   const [openReserve, setOpenReserve] = useState(false);
 
-  const isOwner = useMemo(
-    () => (book && profile ? book.owner?.id === profile.id : false),
-    [book, profile],
-  );
+  const isOwner = useMemo(() => {
+    if (!book || !profile) return false;
+    if (!book.owner?.id) return false;
+    return String(book.owner.id) === String(profile.id);
+  }, [book, profile]);
 
   const handleLike = async () => {
     const optimistic = !isLiked;
@@ -226,7 +234,7 @@ const BookDetailContent = ({ book, profile, onBack }: BookDetailContentProps) =>
                   <span>{book.exchangeLocation.address}</span>
                 </div>
                 <Button
-                  disabled={!book.isAvailable && !isOwner}
+                  disabled={profilePending || (!book.isAvailable && !isOwner)}
                   onClick={() =>
                     isOwner
                       ? navigate(`/book/${book.id}/edit`)

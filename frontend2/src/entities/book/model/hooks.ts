@@ -57,7 +57,7 @@ export const useToggleLike = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (bookId: number) => bookApi.toggleLike(bookId),
+    mutationFn: (bookId: string | number) => bookApi.toggleLike(bookId),
     onSuccess: (_, bookId) => {
       queryClient.invalidateQueries({ queryKey: bookKeys.detail(bookId) });
       queryClient.invalidateQueries({ queryKey: bookKeys.all });
@@ -74,7 +74,7 @@ export const useReserveBook = () => {
       comment,
       meeting_time,
     }: {
-      bookId: number;
+      bookId: string | number;
       comment?: string;
       meeting_time?: string;
     }) => bookApi.reserve(bookId, { comment, meeting_time }),
@@ -87,7 +87,7 @@ export const useReserveBook = () => {
 
 export const useRecordBookClick = () =>
   useMutation({
-    mutationFn: (bookId: number) => bookApi.recordClick(bookId),
+    mutationFn: (bookId: string | number) => bookApi.recordClick(bookId),
   });
 
 export const useCreateBook = () => {
@@ -110,7 +110,7 @@ export const useUpdateBook = () => {
       bookId,
       payload,
     }: {
-      bookId: number;
+      bookId: string | number;
       payload: UpdateBookPayload;
     }) => bookApi.update(bookId, payload),
     onSuccess: (data) => {
@@ -131,7 +131,7 @@ export const useUploadBookPhotos = () => {
       bookId,
       formData,
     }: {
-      bookId: number;
+      bookId: string | number;
       formData: FormData;
     }) => bookApi.uploadPhotos(bookId, formData),
     onSuccess: (_, { bookId }) => {

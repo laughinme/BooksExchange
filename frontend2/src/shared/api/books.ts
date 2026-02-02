@@ -45,23 +45,23 @@ export const bookApi = {
     const { data } = await apiPrivate.post<BookDto>("/books/create", payload);
     return data;
   },
-  update: async (bookId: number, payload: UpdateBookPayload) => {
+  update: async (bookId: string | number, payload: UpdateBookPayload) => {
     const { data } = await apiPrivate.patch<BookDto>(`/books/${bookId}/`, payload);
     return data;
   },
-  uploadPhotos: async (bookId: number, formData: FormData) => {
+  uploadPhotos: async (bookId: string | number, formData: FormData) => {
     const { data } = await apiPrivate.put<BookDto>(`/books/${bookId}/photos`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return data;
   },
-  toggleLike: async (bookId: number) => {
+  toggleLike: async (bookId: string | number) => {
     await apiPrivate.post(`/books/${bookId}/like`);
   },
-  reserve: async (bookId: number, payload: ReserveBookPayload) => {
+  reserve: async (bookId: string | number, payload: ReserveBookPayload) => {
     await apiPrivate.post(`/books/${bookId}/reserve`, payload);
   },
-  recordClick: async (bookId: number) => {
+  recordClick: async (bookId: string | number) => {
     await apiPrivate.post(`/books/${bookId}/click`);
   },
 };
