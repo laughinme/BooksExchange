@@ -34,7 +34,6 @@ class UserService:
         cities_repo: CitiesInterface,
         lang_repo: LanguagesInterface,
         role_repo: RolesInterface,
-        
     ):
         self.uow = uow
         self.user_repo = user_repo

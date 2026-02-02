@@ -2,7 +2,7 @@ from uuid import UUID, uuid4
 from datetime import datetime, date
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import ForeignKey, Integer, Uuid, String, Boolean, DateTime, Float, Date, false, Index
-from sqlalchemy.dialects.postgresql import BYTEA, ENUM
+from sqlalchemy.dialects.postgresql import ENUM
 
 from domain.users import Gender
 from ..table_base import Base
@@ -16,7 +16,7 @@ class User(TimestampMixin, Base):
     
     # Credentials
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
-    password_hash: Mapped[bytes] = mapped_column(BYTEA, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String, nullable=False)
     confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     
     # Profile info

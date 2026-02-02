@@ -14,12 +14,12 @@ def get_v1_router() -> APIRouter:
     router = APIRouter(prefix='/v1')
 
     router.include_router(get_auth_routers())
+    router.include_router(get_roles_router())
     router.include_router(get_admins_router())
     router.include_router(get_users_router())
     router.include_router(get_books_router())
     router.include_router(get_geo_router())
     router.include_router(get_exchanges_router())
     router.include_router(get_misc_router())
-    router.include_router(get_roles_router())
     
     return router

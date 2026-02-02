@@ -52,7 +52,7 @@ def upgrade() -> None:
     op.create_table('users',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
-    sa.Column('password_hash', postgresql.BYTEA(), nullable=False),
+    sa.Column('password_hash', sa.String(), nullable=False),
     sa.Column('confirmed_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('username', sa.String(), nullable=True),
     sa.Column('avatar_url', sa.String(), nullable=True),
