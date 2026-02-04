@@ -1,11 +1,10 @@
 from typing import Annotated, Literal
 from fastapi import APIRouter, Depends, Response, Header
 
-from core.config import Settings
+from core.http.cookies import set_auth_cookies
 from service.auth import CredentialsService, get_credentials_service
-from domain.auth import UserRegister, TokenSet, TokenPair
+from domain.auth import UserRegister,  TokenPair
 
-settings = Settings() # pyright: ignore[reportCallIssue]
 router = APIRouter()
 
 
@@ -32,22 +31,7 @@ async def register_user(
     access, refresh, csrf = await svc.register(payload, client)
     
     if client == 'web':
-        response.set_cookie(
-            "refresh_token",
-            refresh,
-            max_age=settings.REFRESH_TTL,
-            httponly=True,
-            secure=True,
-            samesite="lax",
-        )
-        response.set_cookie(
-            'csrf_token',
-            csrf,
-            max_age=settings.REFRESH_TTL,
-            secure=True,
-            httponly=False,
-            samesite='lax'
-        )
+        set_auth_cookies(response, refresh, csrf)
     
         return TokenPair(access_token=access, refresh_token=None)
     
