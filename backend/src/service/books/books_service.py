@@ -1,13 +1,10 @@
-import aiofiles
-import shutil
 import logging
 
 from uuid import UUID, uuid4
-from pathlib import Path
 from fastapi import UploadFile, HTTPException, status
 
 from domain.books import ApprovalStatus
-from core.config import Settings
+from core.storage import MediaStorage
 from database.relational_db import (
     Book,
     BooksInterface,
@@ -22,8 +19,8 @@ from database.relational_db import (
 from domain.books import BookCreate, BookPatch
 from domain.statistics import Interaction
 
-settings = Settings() # type: ignore
 logger = logging.getLogger(__name__)
+storage = MediaStorage()
 
 class BookService:
     def __init__(
@@ -110,10 +107,8 @@ class BookService:
         if book.owner_id != user.id:
             raise HTTPException(status.HTTP_403_FORBIDDEN, "You don't own this item")
 
-        folder = Path(settings.MEDIA_DIR, "books", str(book_id))
-        if folder.exists():
-            shutil.rmtree(folder)
-        folder.mkdir(parents=True, exist_ok=True)
+        if not storage.s3_enabled:
+            await storage.clear_prefix(f"books/{book_id}")
 
         book.photo_urls.clear()
 
@@ -129,11 +124,8 @@ class BookService:
             ext  = ".jpg" if f.content_type == "image/jpeg" else ".png"
             name = f"{uuid4()}{ext}"
 
-            async with aiofiles.open(folder / name, "wb") as out:
-                while chunk := await f.read(1024 * 1024):
-                    await out.write(chunk)
-
-            url = f"{settings.SITE_URL}/{settings.MEDIA_DIR}/books/{book_id}/{name}"
+            key = f"books/{book_id}/{name}"
+            url = await storage.upload_uploadfile(key, f)
             urls.append(url)
 
         book.photo_urls.extend(urls)

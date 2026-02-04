@@ -1,13 +1,20 @@
+import asyncio
 import logging
 from itertools import cycle
+from pathlib import Path
 from random import Random
+from uuid import uuid4
 
 from sqlalchemy import select
 from database.relational_db import UoW, Book, Author, Genre, ExchangeLocation, Language, User
 from domain.books import Condition, ApprovalStatus
+from core.config import Settings, BASE_DIR
+from core.storage import MediaStorage
 from .registry import BaseSeeder, register
 
 logger = logging.getLogger(__name__)
+settings = Settings()  # type: ignore
+storage = MediaStorage()
 
 ADJECTIVES = [
     "Silent",
@@ -46,6 +53,23 @@ class BooksSeeder(BaseSeeder):
 
     async def run(self, uow: UoW) -> int:
         session = uow.session
+        photo_dir = (
+            Path(settings.SEED_BOOK_PHOTOS_DIR)
+            if settings.SEED_BOOK_PHOTOS_DIR
+            else BASE_DIR / "seed_photos" / "books"
+        )
+        def _collect_photos() -> list[Path]:
+            if not photo_dir.exists():
+                return []
+            return [
+                p
+                for p in photo_dir.iterdir()
+                if p.is_file() and p.suffix.lower() in {".jpg", ".jpeg", ".png"}
+            ]
+
+        photo_files = await asyncio.to_thread(_collect_photos)
+        if not photo_files:
+            logger.info("No seed book photos found in %s.", photo_dir)
         users = (await session.execute(select(User.id).order_by(User.id))).scalars().all()
         if not users:
             logger.warning("No users found; skipping books seeding.")
@@ -140,5 +164,17 @@ class BooksSeeder(BaseSeeder):
 
         session.add_all(books)
         await uow.flush()
+        if photo_files:
+            photo_cycle = cycle(photo_files)
+            for book in books:
+                photo_path = next(photo_cycle)
+                ext = photo_path.suffix.lower()
+                key = f"books/{book.id}/{uuid4()}{ext}"
+                try:
+                    url = await storage.upload_file_path(key, photo_path)
+                except Exception as exc:
+                    logger.warning("Failed to upload seed photo %s: %s", photo_path, exc)
+                    continue
+                book.photo_urls = [url]
         logger.info("Seeded %d books.", len(books))
         return len(books)

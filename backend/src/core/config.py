@@ -30,6 +30,18 @@ class Settings(BaseSettings):
     # Media settings
     MEDIA_DIR: str = 'media'
     MAX_PHOTO_SIZE: int = 5  # in MB
+
+    # S3/Tigris settings
+    S3_ENDPOINT_URL: str | None = None
+    S3_PUBLIC_URL: str | None = None
+    S3_BUCKET: str | None = None
+    S3_ACCESS_KEY_ID: str | None = None
+    S3_SECRET_ACCESS_KEY: str | None = None
+    S3_REGION: str = "auto"
+    S3_ADDRESSING_STYLE: Literal["virtual", "path"] = "path"
+
+    # Seeder settings
+    SEED_BOOK_PHOTOS_DIR: str | None = None
     
     # Auth Settings    
     JWT_PRIVATE_KEY: str | None = None

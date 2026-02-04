@@ -1,12 +1,9 @@
-import aiofiles
-import shutil
 from datetime import date, datetime
 
 from uuid import UUID, uuid4
-from pathlib import Path
 from fastapi import UploadFile, status, HTTPException
 
-from core.config import Settings
+from core.storage import MediaStorage
 from domain.users import UserPatch, Gender
 from domain.roles import RoleModel
 from database.relational_db import (
@@ -22,7 +19,7 @@ from database.relational_db import (
 )
 from .exceptions import IncorrectGenreId, IncorrectCityId
 
-settings = Settings() # type: ignore
+storage = MediaStorage()
 
 class UserService:
     def __init__(
@@ -88,11 +85,6 @@ class UserService:
         file: UploadFile,
         user: User
     ) -> None:
-        folder = Path(settings.MEDIA_DIR, "users", str(user.id))
-        if folder.exists():
-            shutil.rmtree(folder)
-        folder.mkdir(parents=True, exist_ok=True)
-
         if file.content_type not in ("image/jpeg", "image/png"):
             raise HTTPException(
                 status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
@@ -101,12 +93,11 @@ class UserService:
 
         ext  = ".jpg" if file.content_type == "image/jpeg" else ".png"
         name = f"{uuid4()}{ext}"
+        if not storage.s3_enabled:
+            await storage.clear_prefix(f"users/{user.id}")
 
-        async with aiofiles.open(folder / name, "wb") as out:
-            while chunk := await file.read(1024 * 1024):
-                await out.write(chunk)
-
-        url = f"{settings.SITE_URL}/{settings.MEDIA_DIR}/users/{user.id}/{name}"
+        key = f"users/{user.id}/{name}"
+        url = await storage.upload_uploadfile(key, file)
 
         user.avatar_url = url
 

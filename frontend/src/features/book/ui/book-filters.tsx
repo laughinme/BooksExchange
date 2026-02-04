@@ -25,9 +25,9 @@ export const BookFiltersPanel = ({ value, onChange }: BookFiltersProps) => {
     onChange({
       query: value.query ?? "",
       sort: "newest",
-      genre: "all",
-      distance: 50,
-      rating: 1,
+      genre: undefined,
+      distance: undefined,
+      rating: undefined,
       limit: value.limit,
     });
   };
@@ -137,7 +137,7 @@ export const BookFiltersPanel = ({ value, onChange }: BookFiltersProps) => {
                 Рейтинг от {ratingValue}
               </span>
             )}
-            {limitValue && (
+            {value.limit !== undefined && (
               <span className="rounded-full border border-border/70 bg-secondary/60 px-2 py-1 text-[11px]">
                 Лимит {limitValue}
               </span>

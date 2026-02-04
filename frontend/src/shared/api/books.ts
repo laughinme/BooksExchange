@@ -10,13 +10,18 @@ import {
 
 const pickAllowedFilters = (params: BookFilters) => {
   const { query, limit, sort, genre, distance, rating } = params;
+  const normalizedGenre = genre && genre !== "all" ? genre : undefined;
+  const normalizedDistance =
+    distance !== undefined && distance < 50 ? distance : undefined;
+  const normalizedRating =
+    rating !== undefined && rating > 1 ? rating : undefined;
   return {
     query: query ?? "",
     ...(limit !== undefined ? { limit } : {}),
     ...(sort ? { sort } : {}),
-    ...(genre ? { genre } : {}),
-    ...(distance ? { distance } : {}),
-    ...(rating ? { rating } : {}),
+    ...(normalizedGenre ? { genre: normalizedGenre } : {}),
+    ...(normalizedDistance !== undefined ? { distance: normalizedDistance } : {}),
+    ...(normalizedRating !== undefined ? { rating: normalizedRating } : {}),
   };
 };
 
