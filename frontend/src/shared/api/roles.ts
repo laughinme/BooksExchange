@@ -9,7 +9,7 @@ export type RoleDto = {
 
 export const rolesApi = {
   list: (params?: { search?: string; limit?: number }) =>
-    apiPrivate.get<RoleDto[]>("/roles/", { params }).then((res) => res.data),
+    apiPrivate.get<RoleDto[]>("/roles", { params }).then((res) => res.data),
   getById: (roleId: string) =>
     apiPrivate.get<RoleDto>(`/roles/${roleId}`).then((res) => res.data),
 };

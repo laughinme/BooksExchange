@@ -12,28 +12,28 @@ import {
 
 export const referenceApi = {
   getGenres: async () => {
-    const { data } = await apiPrivate.get<GenreDto[]>("/books/genres/");
+    const { data } = await apiPrivate.get<GenreDto[]>("/books/genres");
     return data;
   },
   getAuthors: async () => {
-    const { data } = await apiPrivate.get<AuthorDto[]>("/books/authors/");
+    const { data } = await apiPrivate.get<AuthorDto[]>("/books/authors");
     return data;
   },
   getAuthorById: async (authorId: number) => {
-    const { data } = await apiPrivate.get<AuthorDto>(`/books/authors/${authorId}/`);
+    const { data } = await apiPrivate.get<AuthorDto>(`/books/authors/${authorId}`);
     return data;
   },
   getLanguages: async () => {
-    const { data } = await apiPrivate.get<LanguageDto[]>("/languages/");
+    const { data } = await apiPrivate.get<LanguageDto[]>("/languages");
     return data;
   },
   getCities: async () => {
-    const { data } = await apiPrivate.get<CityDto[]>("/geo/cities/");
+    const { data } = await apiPrivate.get<CityDto[]>("/geo/cities");
     return data;
   },
   getExchangeLocations: async (filterByDistance = true) => {
     const { data } = await apiPrivate.get<ExchangeLocationDto[]>(
-      "/geo/exchange_locations/",
+      "/geo/exchange_locations",
       { params: { filter: filterByDistance } },
     );
     return data;
@@ -52,7 +52,7 @@ export const referenceApi = {
     }
   },
   getGenreById: async (genreId: number) => {
-    const { data } = await apiPrivate.get<GenreDto>(`/books/genres/${genreId}/`);
+    const { data } = await apiPrivate.get<GenreDto>(`/books/genres/${genreId}`);
     return data;
   },
 };

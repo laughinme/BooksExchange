@@ -11,11 +11,11 @@ export type UpdateFavoriteGenresPayload = {
 
 export const profileApi = {
   getMe: async () => {
-    const { data } = await apiPrivate.get<ProfileDto>("/users/me/");
+    const { data } = await apiPrivate.get<ProfileDto>("/users/me");
     return data;
   },
   updateProfile: async (payload: UpdateProfilePayload) => {
-    const { data } = await apiPrivate.patch<ProfileDto>("/users/me/", payload);
+    const { data } = await apiPrivate.patch<ProfileDto>("/users/me", payload);
     return data;
   },
   updateFavoriteGenres: async (genreIds: number[]) => {

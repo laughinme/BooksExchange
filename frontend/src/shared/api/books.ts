@@ -28,7 +28,7 @@ export const bookApi = {
     return data;
   },
   getAll: async (params?: BookFilters) => {
-    const { data } = await apiPrivate.get<BookDto[]>("/books/", {
+    const { data } = await apiPrivate.get<BookDto[]>("/books", {
       params: params ? pickAllowedFilters(params) : undefined,
     });
     return data;
@@ -38,7 +38,7 @@ export const bookApi = {
     return data;
   },
   getById: async (bookId: string) => {
-    const { data } = await apiPrivate.get<BookDto>(`/books/${bookId}/`);
+    const { data } = await apiPrivate.get<BookDto>(`/books/${bookId}`);
     return data;
   },
   create: async (payload: CreateBookPayload) => {
@@ -46,7 +46,7 @@ export const bookApi = {
     return data;
   },
   update: async (bookId: string, payload: UpdateBookPayload) => {
-    const { data } = await apiPrivate.patch<BookDto>(`/books/${bookId}/`, payload);
+    const { data } = await apiPrivate.patch<BookDto>(`/books/${bookId}`, payload);
     return data;
   },
   uploadPhotos: async (bookId: string, formData: FormData) => {

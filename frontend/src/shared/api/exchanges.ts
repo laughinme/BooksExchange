@@ -8,7 +8,7 @@ export type ExchangeActionPayload = {
 
 export const exchangeApi = {
   getAll: async (params?: { only_active?: boolean }) => {
-    const { data } = await apiPrivate.get<ExchangeDto[]>("/exchanges/", { params });
+    const { data } = await apiPrivate.get<ExchangeDto[]>("/exchanges", { params });
     return data;
   },
   getOwned: async (params?: { only_active?: boolean }) => {
@@ -20,12 +20,12 @@ export const exchangeApi = {
     return data;
   },
   getById: async (exchangeId: string) => {
-    const { data } = await apiPrivate.get<ExchangeDto>(`/exchanges/${exchangeId}/`);
+    const { data } = await apiPrivate.get<ExchangeDto>(`/exchanges/${exchangeId}`);
     return data;
   },
   edit: async (exchangeId: string, payload: { meeting_time?: string | null }) => {
     const { data } = await apiPrivate.patch<ExchangeDto>(
-      `/exchanges/${exchangeId}/`,
+      `/exchanges/${exchangeId}`,
       payload,
     );
     return data;

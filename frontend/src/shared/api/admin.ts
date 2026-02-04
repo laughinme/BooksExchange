@@ -18,14 +18,14 @@ export type AdminListUsersParams = {
 
 export const adminApi = {
   listBooks: (params: AdminListBooksParams) =>
-    apiPrivate.get<BookDto[]>("/admins/books/", { params }).then((res) => res.data),
+    apiPrivate.get<BookDto[]>("/admins/books", { params }).then((res) => res.data),
   acceptBook: (bookId: string) =>
     apiPrivate.post(`/admins/books/${bookId}/accept`).then((res) => res.data),
   rejectBook: (bookId: string, reason?: string) =>
     apiPrivate.post(`/admins/books/${bookId}/reject`, { reason }).then((res) => res.data),
 
   listUsers: (params: AdminListUsersParams) =>
-    apiPrivate.get<CursorPage<ProfileDto>>("/admins/users/", { params }).then((res) => res.data),
+    apiPrivate.get<CursorPage<ProfileDto>>("/admins/users", { params }).then((res) => res.data),
   setUserBan: (userId: string, banned: boolean) =>
     apiPrivate.post<ProfileDto>(`/admins/users/${userId}/ban`, { banned }).then((res) => res.data),
   setUserRoles: (userId: string, roles: string[]) =>
@@ -48,10 +48,10 @@ export const adminApi = {
 
   listExchanges: (params?: Record<string, unknown>) =>
     apiPrivate
-      .get<CursorPage<ExchangeDto>>("/admins/exchanges/", { params })
+      .get<CursorPage<ExchangeDto>>("/admins/exchanges", { params })
       .then((res) => res.data),
   getExchange: (exchangeId: string) =>
-    apiPrivate.get<ExchangeDto>(`/admins/exchanges/${exchangeId}/`).then((res) => res.data),
+    apiPrivate.get<ExchangeDto>(`/admins/exchanges/${exchangeId}`).then((res) => res.data),
   forceFinishExchange: (exchangeId: string) =>
     apiPrivate.post(`/admins/exchanges/${exchangeId}/force-finish`).then((res) => res.data),
   forceCancelExchange: (exchangeId: string) =>
