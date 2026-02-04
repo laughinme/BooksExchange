@@ -13,7 +13,7 @@ def get_specific_book_router() -> APIRouter:
 
     router.include_router(info_router)
     router.include_router(edit_router)
-    router.include_router(photos_router, prefix='/{book_id}')
-    router.include_router(interactions_router, prefix='/{book_id}')
+    router.include_router(photos_router, prefix='/{book_id:uuid}')
+    router.include_router(interactions_router, prefix='/{book_id:uuid}')
     
     return router

@@ -10,7 +10,7 @@ from service.books import BookService, get_books_service
 router = APIRouter()
 
 @router.patch(
-    path='/{book_id}',
+    path='/{book_id:uuid}',
     response_model=BookModel,
     summary="Edit book data",
 )
