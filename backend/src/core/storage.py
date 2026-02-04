@@ -18,10 +18,10 @@ class MediaStorage:
     def __init__(self) -> None:
         self._s3_enabled = all(
             [
-                settings.S3_ENDPOINT_URL,
-                settings.S3_ACCESS_KEY_ID,
-                settings.S3_SECRET_ACCESS_KEY,
-                settings.S3_BUCKET,
+            settings.S3_ENDPOINT_URL,
+            settings.S3_ACCESS_KEY_ID,
+            settings.S3_SECRET_ACCESS_KEY,
+            settings.S3_BUCKET,
             ]
         )
         self._s3_client = None

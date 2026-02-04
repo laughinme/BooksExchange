@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 
 COPY src ./src 
+COPY seed_photos ./seed_photos
 COPY entry.sh .
 
 ENV PYTHONPATH=/app/src

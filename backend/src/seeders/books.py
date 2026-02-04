@@ -5,7 +5,7 @@ from pathlib import Path
 from random import Random
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from database.relational_db import UoW, Book, Author, Genre, ExchangeLocation, Language, User
 from domain.books import Condition, ApprovalStatus
 from core.config import Settings, BASE_DIR
@@ -158,15 +158,22 @@ class BooksSeeder(BaseSeeder):
                 )
             )
 
-        if not books:
+        inserted = 0
+        if books:
+            session.add_all(books)
+            await uow.flush()
+            inserted = len(books)
+        else:
             logger.info("No new books to seed.")
-            return 0
 
-        session.add_all(books)
-        await uow.flush()
+        photos_assigned = 0
         if photo_files:
             photo_cycle = cycle(photo_files)
-            for book in books:
+            stmt = select(Book).where(
+                func.coalesce(func.array_length(Book.photo_urls, 1), 0) == 0
+            )
+            books_without_photos = (await session.execute(stmt)).scalars().all()
+            for book in books_without_photos:
                 photo_path = next(photo_cycle)
                 ext = photo_path.suffix.lower()
                 key = f"books/{book.id}/{uuid4()}{ext}"
@@ -176,5 +183,11 @@ class BooksSeeder(BaseSeeder):
                     logger.warning("Failed to upload seed photo %s: %s", photo_path, exc)
                     continue
                 book.photo_urls = [url]
-        logger.info("Seeded %d books.", len(books))
-        return len(books)
+                photos_assigned += 1
+
+        if inserted:
+            logger.info("Seeded %d books.", inserted)
+        if photos_assigned:
+            logger.info("Assigned photos to %d existing books.", photos_assigned)
+
+        return inserted
