@@ -8,7 +8,7 @@ class LanguagesInterface:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def search(self, q: str, limit: int) -> list[Language]:
+    async def search(self, q: str | None, limit: int) -> list[Language]:
         stmt = select(Language)
 
         if q:

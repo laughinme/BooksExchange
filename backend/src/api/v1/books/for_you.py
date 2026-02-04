@@ -19,7 +19,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 async def for_you(
     user: Annotated[User, Depends(auth_user)],
     svc: Annotated[BookService, Depends(get_books_service)],
-    query: str = Query("", max_length=50),
+    query: str | None = Query(None, max_length=50),
     limit: int | None = Query(None, ge=1, le=50),
     sort: str | None = Query(
         None,

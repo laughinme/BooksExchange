@@ -19,7 +19,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 async def get_books(
     user: Annotated[User, Depends(auth_user)],
     svc: Annotated[BookService, Depends(get_books_service)],
-    query: str = Query("", max_length=50, description="Search by title/author/genre"),
+    query: str | None = Query(None, max_length=50, description="Search by title/author/genre"),
     limit: int = Query(50, ge=1, le=200, description='Number of books to return'),
     sort: str | None = Query(
         None,
