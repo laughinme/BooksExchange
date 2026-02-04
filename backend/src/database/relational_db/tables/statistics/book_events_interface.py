@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from uuid import UUID
-from sqlalchemy import select, delete, func, case
+from sqlalchemy import select, delete, func, case, true, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
 
@@ -27,7 +27,7 @@ class BookEventsInterface:
             .values(book_id=book_id, user_id=user_id, interaction=interaction)
             .on_conflict_do_nothing(
                 index_elements=("book_id", "user_id"),
-                index_where=BookEvent.interaction == Interaction.LIKE
+                index_where=text("interaction = 'LIKE'"),
             )
             .returning(BookEvent.id)
         )
@@ -125,7 +125,7 @@ class BookEventsInterface:
             )
             .where(
                 BookEvent.created_at >= datetime.now() - timedelta(days=days),
-                BookEvent.book_id == book_id if book_id is not None else True,
+                BookEvent.book_id == book_id if book_id is not None else true(),
             )
             .group_by(day)
             .order_by(day)

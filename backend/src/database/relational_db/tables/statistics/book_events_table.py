@@ -28,6 +28,6 @@ class BookEvent(CreatedAtMixin, Base):
             'book_id',
             'user_id',
             unique=True,
-            postgresql_where=text("interaction = 'like'"),
+            postgresql_where=text("interaction = 'LIKE'"),
         ),
     )
