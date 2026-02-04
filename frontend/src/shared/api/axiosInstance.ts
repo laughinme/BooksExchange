@@ -6,9 +6,7 @@ import axios, {
 
 import { clearCookie, getCsrfToken } from "@/shared/lib/cookies";
 
-const BASE_URL = import.meta.env.DEV
-  ? "/api/v1"
-  : "https://books-exchange.fly.dev/api/v1";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
 
 export const apiPublic = axios.create({
   baseURL: BASE_URL,
