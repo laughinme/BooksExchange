@@ -183,7 +183,12 @@ cython_debug/
 secrets/
 *.DS_Store
 /backend/src/media
-test.py
 /.vscode
 *.zip
 .vercel
+seed_photos/
+!seed_photos/books/.gitkeep
+
+# Temporary tests
+tests/
+test.py
