@@ -1,6 +1,7 @@
 import asyncio
 import mimetypes
 import shutil
+from urllib.parse import urlsplit
 from pathlib import Path
 from typing import Optional
 
@@ -48,6 +49,12 @@ class MediaStorage:
                 return settings.S3_PUBLIC_URL.rstrip("/")
             endpoint = (settings.S3_ENDPOINT_URL or "").rstrip("/")
             bucket = settings.S3_BUCKET or ""
+            addressing = (settings.S3_ADDRESSING_STYLE or "path").strip().lower()
+            if addressing == "virtual" and endpoint and bucket:
+                parts = urlsplit(endpoint if "://" in endpoint else f"https://{endpoint}")
+                host = parts.netloc or parts.path
+                scheme = parts.scheme or "https"
+                return f"{scheme}://{bucket}.{host}"
             return f"{endpoint}/{bucket}"
         site = settings.SITE_URL.rstrip("/")
         media = settings.MEDIA_DIR.strip("/")

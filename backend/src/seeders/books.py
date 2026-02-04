@@ -6,10 +6,20 @@ from random import Random
 from uuid import uuid4
 
 from sqlalchemy import select, func
-from database.relational_db import UoW, Book, Author, Genre, ExchangeLocation, Language, User
+from database.relational_db import (
+    UoW,
+    Book,
+    Author,
+    Genre,
+    ExchangeLocation,
+    Language,
+    User,
+    City,
+)
 from domain.books import Condition, ApprovalStatus
 from core.config import Settings, BASE_DIR
 from core.storage import MediaStorage
+from core.crypto import hash_password
 from .registry import BaseSeeder, register
 
 logger = logging.getLogger(__name__)
@@ -46,6 +56,35 @@ DESCRIPTION_TEMPLATES = [
     "A classic-style narrative built for easy, relaxed reading.",
 ]
 
+DEFAULT_AUTHORS = [
+    "Александр Пушкин",
+    "Фёдор Достоевский",
+    "Лев Толстой",
+    "Антон Чехов",
+    "Джейн Остин",
+    "Агата Кристи",
+]
+
+DEFAULT_GENRES = [
+    "Классика",
+    "Фэнтези",
+    "Детектив",
+    "Философия",
+    "Фантастика",
+]
+
+DEFAULT_CITIES = ["Москва", "Санкт-Петербург"]
+
+DEFAULT_LOCATIONS = [
+    {
+        "title": "Центральная библиотека",
+        "description": "Главный пункт обмена книгами",
+        "address": "ул. Ленина, 1",
+        "latitude": 55.7558,
+        "longitude": 37.6173,
+    }
+]
+
 
 @register
 class BooksSeeder(BaseSeeder):
@@ -64,44 +103,109 @@ class BooksSeeder(BaseSeeder):
             return [
                 p
                 for p in photo_dir.iterdir()
-                if p.is_file() and p.suffix.lower() in {".jpg", ".jpeg", ".png"}
+                if p.is_file()
+                and p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp", ".avif"}
             ]
 
         photo_files = await asyncio.to_thread(_collect_photos)
         if not photo_files:
-            logger.info("No seed book photos found in %s.", photo_dir)
-        users = (await session.execute(select(User.id).order_by(User.id))).scalars().all()
-        if not users:
-            logger.warning("No users found; skipping books seeding.")
-            return 0
+            logger.info("No seed book photos found in %s.", photo_dir.resolve())
+        else:
+            logger.info("Found %d seed book photos in %s.", len(photo_files), photo_dir.resolve())
+
+        seed_user = await session.scalar(
+            select(User).where(User.email == "seed@books.local")
+        )
+        if seed_user is None:
+            logger.info("Seed user is missing; creating seed user.")
+            password_hash = await hash_password("seed1234")
+            seed_user = User(
+                email="seed@books.local",
+                password_hash=password_hash,
+                username="Seed User",
+                public=True,
+            )
+            session.add(seed_user)
+            await uow.flush()
+
+        seed_owner_id = seed_user.id
 
         authors = (await session.execute(
             select(Author.id).order_by(Author.id)
         )).scalars().all()
         if not authors:
-            logger.warning("No authors found; skipping books seeding.")
-            return 0
+            logger.info("No authors found; creating default authors.")
+            session.add_all([Author(name=name) for name in DEFAULT_AUTHORS])
+            await uow.flush()
+            authors = (await session.execute(
+                select(Author.id).order_by(Author.id)
+            )).scalars().all()
 
         genres = (await session.execute(
             select(Genre.id).order_by(Genre.id)
         )).scalars().all()
         if not genres:
-            logger.warning("No genres found; skipping books seeding.")
-            return 0
-
-        locations = (await session.execute(
-            select(ExchangeLocation.id).where(ExchangeLocation.is_active.is_(True)).order_by(ExchangeLocation.id)
-        )).scalars().all()
-        if not locations:
-            logger.warning("No exchange locations found; skipping books seeding.")
-            return 0
+            logger.info("No genres found; creating default genres.")
+            session.add_all([Genre(name=name) for name in DEFAULT_GENRES])
+            await uow.flush()
+            genres = (await session.execute(
+                select(Genre.id).order_by(Genre.id)
+            )).scalars().all()
 
         language_codes = (await session.execute(
             select(Language.code).order_by(Language.code)
         )).scalars().all()
         if not language_codes:
-            logger.warning("No languages found; skipping books seeding.")
-            return 0
+            logger.info("No languages found; creating default languages.")
+            session.add_all(
+                [
+                    Language(code="ru", name_ru="Русский", name_en="Russian"),
+                    Language(code="en", name_ru="Английский", name_en="English"),
+                ]
+            )
+            await uow.flush()
+            language_codes = (await session.execute(
+                select(Language.code).order_by(Language.code)
+            )).scalars().all()
+
+        locations = (await session.execute(
+            select(ExchangeLocation.id)
+            .where(ExchangeLocation.is_active.is_(True))
+            .order_by(ExchangeLocation.id)
+        )).scalars().all()
+        if not locations:
+            cities = (await session.execute(
+                select(City).order_by(City.id)
+            )).scalars().all()
+            if not cities:
+                logger.info("No cities found; creating default cities.")
+                session.add_all([City(name=name) for name in DEFAULT_CITIES])
+                await uow.flush()
+                cities = (await session.execute(
+                    select(City).order_by(City.id)
+                )).scalars().all()
+            logger.info("No exchange locations found; creating default locations.")
+            locations_payload = []
+            for city in cities:
+                for loc in DEFAULT_LOCATIONS:
+                    locations_payload.append(
+                        ExchangeLocation(
+                            city_id=city.id,
+                            title=f"{loc['title']} ({city.name})",
+                            description=loc["description"],
+                            address=loc["address"],
+                            latitude=loc["latitude"],
+                            longitude=loc["longitude"],
+                            is_active=True,
+                        )
+                    )
+            session.add_all(locations_payload)
+            await uow.flush()
+            locations = (await session.execute(
+                select(ExchangeLocation.id)
+                .where(ExchangeLocation.is_active.is_(True))
+                .order_by(ExchangeLocation.id)
+            )).scalars().all()
 
         preferred_languages = [code for code in ("ru", "en") if code in language_codes]
         if not preferred_languages:
@@ -116,7 +220,6 @@ class BooksSeeder(BaseSeeder):
 
         author_cycle = cycle(authors)
         genre_cycle = cycle(genres)
-        user_cycle = cycle(users)
         location_cycle = cycle(locations)
         language_cycle = cycle(preferred_languages)
         condition_cycle = cycle(
@@ -132,7 +235,7 @@ class BooksSeeder(BaseSeeder):
                 continue
 
             genre_id = next(genre_cycle)
-            owner_id = next(user_cycle)
+            owner_id = seed_owner_id
             exchange_location_id = next(location_cycle)
             language_code = next(language_cycle)
             condition = next(condition_cycle)
@@ -185,9 +288,35 @@ class BooksSeeder(BaseSeeder):
                 book.photo_urls = [url]
                 photos_assigned += 1
 
+        rewritten = 0
+        if storage.s3_enabled:
+            endpoint = (settings.S3_ENDPOINT_URL or "").rstrip("/")
+            bucket = settings.S3_BUCKET or ""
+            legacy_base = f"{endpoint}/{bucket}" if endpoint and bucket else ""
+            public_base = storage._public_base_url()
+            if legacy_base and legacy_base != public_base:
+                stmt = select(Book).where(
+                    func.coalesce(func.array_length(Book.photo_urls, 1), 0) > 0
+                )
+                books_with_urls = (await session.execute(stmt)).scalars().all()
+                for book in books_with_urls:
+                    updated = False
+                    new_urls: list[str] = []
+                    for url in book.photo_urls:
+                        if url.startswith(legacy_base):
+                            new_urls.append(url.replace(legacy_base, public_base, 1))
+                            updated = True
+                        else:
+                            new_urls.append(url)
+                    if updated:
+                        book.photo_urls = new_urls
+                        rewritten += 1
+
         if inserted:
             logger.info("Seeded %d books.", inserted)
         if photos_assigned:
             logger.info("Assigned photos to %d existing books.", photos_assigned)
+        if rewritten:
+            logger.info("Rewrote photo URLs for %d books.", rewritten)
 
         return inserted
