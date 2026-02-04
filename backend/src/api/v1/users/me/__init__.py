@@ -7,11 +7,11 @@ def get_me_router() -> APIRouter:
     from .picture import router as picture_router
     from .roles import router as roles_router
     
-    router = APIRouter(prefix='/me')
+    router = APIRouter()
     
     router.include_router(profile_router)
-    router.include_router(genres_router)
-    router.include_router(picture_router)
-    router.include_router(roles_router)
+    router.include_router(genres_router, prefix='/me')
+    router.include_router(picture_router, prefix='/me')
+    router.include_router(roles_router, prefix='/me')
     
     return router

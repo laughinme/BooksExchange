@@ -49,14 +49,10 @@ class Book(TimestampMixin, Base):
         return self.exchange.is_active
         
     @has_active_exchange.expression
-    @classmethod
-    def has_active_exchange_expr(cls):
+    def has_active_exchange(cls):
         """SQLAlchemy expression for has_active_exchange"""
         from ..exchanges import Exchange
-        return (
-            cls.exchange.has() & 
-            Exchange.is_active_expr()
-        )
+        return cls.exchange.has(Exchange.is_active)
     
     @hybrid_property  
     def is_publicly_visible(self) -> bool:
@@ -68,13 +64,12 @@ class Book(TimestampMixin, Base):
         )
     
     @is_publicly_visible.expression
-    @classmethod
-    def is_publicly_visible_expr(cls):
+    def is_publicly_visible(cls):
         """SQLAlchemy expression for is_publicly_visible"""
         return (
             (cls.approval_status == ApprovalStatus.APPROVED) &
             cls.is_available &
-            ~cls.has_active_exchange_expr()
+            ~cls.has_active_exchange
         )
     
     owner: Mapped['User'] = relationship(lazy='selectin') # type: ignore

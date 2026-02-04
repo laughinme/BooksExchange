@@ -13,7 +13,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 logger = logging.getLogger(__name__)
 
 @router.get(
-    path='',
+    path='/me',
     response_model=UserModel,
     summary='Get user account info'
 )
@@ -27,7 +27,7 @@ async def profile(
 
 
 @router.patch(
-    path='',
+    path='/me',
     response_model=UserModel,
     summary='Update user info'
 )

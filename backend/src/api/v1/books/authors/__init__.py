@@ -6,11 +6,9 @@ def get_authors_router() -> APIRouter:
     from .list import router as list_router
     from .author_id import get_specific_author_router
     
-    router = APIRouter(
-        prefix='/authors',
-    )
+    router = APIRouter()
 
     router.include_router(list_router)
-    router.include_router(get_specific_author_router())
+    router.include_router(get_specific_author_router(), prefix='/authors')
     
     return router

@@ -9,7 +9,7 @@ router = APIRouter()
 
 
 @router.get(
-    path='',
+    path='/languages',
     response_model=list[LanguageModel],
     summary='List all languages'
 )

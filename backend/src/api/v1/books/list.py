@@ -12,7 +12,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 
 
 @router.get(
-    path='',
+    path='/books',
     response_model=list[BookModel],
     summary='List all books without filters',
 )
@@ -56,7 +56,7 @@ async def get_books(
 
 
 @router.get(
-    path='/my',
+    path='/books/my',
     response_model=list[BookModel],
     summary='List all books that belong to the current user',
 )

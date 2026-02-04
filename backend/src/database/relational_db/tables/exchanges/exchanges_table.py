@@ -5,7 +5,7 @@ from sqlalchemy import Uuid, String, ForeignKey, Integer, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.postgresql import ENUM
 
-from domain.exchanges import ExchangeProgress, ActiveStatuses
+from domain.exchanges import ExchangeProgress, active_statuses
 from ..table_base import Base
 from ..mixins import TimestampMixin
 
@@ -37,12 +37,11 @@ class Exchange(TimestampMixin, Base):
     
     @hybrid_property
     def is_active(self) -> bool:
-        return self.progress in list(ActiveStatuses)
+        return self.progress in active_statuses
     
     @is_active.expression
-    @classmethod
-    def is_active_expr(cls):
-        return cls.progress.in_(list(ActiveStatuses)) 
+    def is_active(cls):
+        return cls.progress.in_(active_statuses) 
         
     book: Mapped['Book'] = relationship( # type: ignore
         back_populates='exchange', lazy='selectin'

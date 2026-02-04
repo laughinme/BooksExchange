@@ -11,7 +11,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 
 
 @router.get(
-    path='',
+    path='/cities',
     response_model=list[CityModel],
     summary='List all supported cities'
 )

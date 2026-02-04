@@ -9,6 +9,7 @@ class ExchangeProgress(Enum):
     FINISHED = "finished"
     CANCELED = "canceled"
 
-class ActiveStatuses(Enum):
-    CREATED = "created"
-    ACCEPTED = "accepted"
+active_statuses = (
+    ExchangeProgress.CREATED,
+    ExchangeProgress.ACCEPTED,
+)

@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get(
-    path='',
+    path='/roles',
     response_model=list[RoleModel],
     summary='List all roles'
 )
@@ -24,7 +24,7 @@ async def list_roles(
 
 
 @router.get(
-    path='/{role_id}',
+    path='/roles/{role_id}',
     response_model=RoleModel,
     summary='Get a role by id'
 )
@@ -35,7 +35,7 @@ async def get_role(
     return await svc.get_role(role_id)
 
 @router.get(
-    path='/my',
+    path='/roles/my',
     response_model=list[RoleModel],
     summary='Get current user roles'
 )

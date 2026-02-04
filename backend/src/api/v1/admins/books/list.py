@@ -12,7 +12,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 
 
 @router.get(
-    path='',
+    path='/books',
     response_model=list[BookModel],
     summary='List all books with filters',
 )

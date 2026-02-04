@@ -9,16 +9,15 @@ def get_books_router() -> APIRouter:
     from .create import router as create_router
     
     router = APIRouter(
-        prefix='/books',
         tags=['Books'],
         responses={401: {"description": "Not authorized"}}
     )
 
-    router.include_router(get_authors_router())
-    router.include_router(get_genres_router())
-    router.include_router(get_specific_book_router())
+    router.include_router(get_authors_router(), prefix='/books')
+    router.include_router(get_genres_router(), prefix='/books')
+    router.include_router(get_specific_book_router(), prefix='/books')
     router.include_router(list_router)
-    router.include_router(for_you_router)
-    router.include_router(create_router)
+    router.include_router(for_you_router, prefix='/books')
+    router.include_router(create_router, prefix='/books')
     
     return router

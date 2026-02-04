@@ -7,12 +7,11 @@ def get_specific_exchange_router() -> APIRouter:
     from .finish import router as finish_router
     
     router = APIRouter(
-        prefix='/{exchange_id}',
         responses={404: {'description': 'Exchange with this `exchange_id` not found.'}}
     )
 
     router.include_router(info_router)
-    router.include_router(progress_router)
-    router.include_router(finish_router)
+    router.include_router(progress_router, prefix='/{exchange_id}')
+    router.include_router(finish_router, prefix='/{exchange_id}')
     
     return router

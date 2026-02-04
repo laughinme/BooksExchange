@@ -13,7 +13,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 
 
 @router.get(
-    path='',
+    path='/{exchange_id}',
     response_model=ExchangeModel,
     summary='Get specific exchange',
 )

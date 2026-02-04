@@ -12,7 +12,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 
 
 @router.get(
-    path='/nearest',
+    path='/exchange_locations/nearest',
     response_model=ExchangeLocation,
     summary='Get nearest exchange point to user'
 )

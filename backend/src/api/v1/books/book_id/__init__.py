@@ -8,13 +8,12 @@ def get_specific_book_router() -> APIRouter:
     from .interactions import router as interactions_router
     
     router = APIRouter(
-        prefix='/{book_id}',
         responses={404: {'description': 'Book with this `book_id` not found.'}}
     )
 
     router.include_router(info_router)
     router.include_router(edit_router)
-    router.include_router(photos_router)
-    router.include_router(interactions_router)
+    router.include_router(photos_router, prefix='/{book_id}')
+    router.include_router(interactions_router, prefix='/{book_id}')
     
     return router

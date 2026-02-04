@@ -19,7 +19,7 @@ from .unit_of_work import UoW
 config = Settings() # pyright: ignore[reportCallIssue]
 logger = logging.getLogger(__name__)
 
-engine: AsyncEngine = create_async_engine(config.DATABASE_URL, echo=config.ECHO_MODE)
+engine: AsyncEngine = create_async_engine(config.DATABASE_URL, echo=config.DEBUG)
 async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(engine, expire_on_commit=False)
 
 

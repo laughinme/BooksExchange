@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get(
-    path='',
+    path='/exchanges',
     response_model=list[ExchangeModel],
     summary='List all exchanges related to current user',
 )
@@ -24,7 +24,7 @@ async def list_all_exchanges(
 
 
 @router.get(
-    path='/owned',
+    path='/exchanges/owned',
     response_model=list[ExchangeModel],
     summary='List exchanges where current user is the owner',
 )
@@ -39,7 +39,7 @@ async def list_owned_exchanges(
 
 
 @router.get(
-    path='/requested',
+    path='/exchanges/requested',
     response_model=list[ExchangeModel],
     summary='List exchanges requested by current user',
 )

@@ -6,12 +6,11 @@ def get_exchanges_router() -> APIRouter:
     from .exchange_id import get_specific_exchange_router
 
     router = APIRouter(
-        prefix='/exchanges',
         tags=['Exchanges'],
         responses={401: {"description": "Not authorized"}}
     )
 
     router.include_router(list_router)
-    router.include_router(get_specific_exchange_router())
+    router.include_router(get_specific_exchange_router(), prefix='/exchanges')
 
     return router

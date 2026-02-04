@@ -1,1 +1,1 @@
-from .status import ExchangeProgress, ActiveStatuses
+from .status import ExchangeProgress, active_statuses
