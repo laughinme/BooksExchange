@@ -12,7 +12,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 
 
 @router.get(
-    path='/',
+    path='',
     response_model=list[GenreModel],
     summary='List all available genres'
 )

@@ -11,7 +11,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 
 
 @router.get(
-    path='/',
+    path='',
     response_model=BookModel,
     summary='Get specific location by its id',
     responses={404: {'description': 'Location with this `location_id` not found'}},

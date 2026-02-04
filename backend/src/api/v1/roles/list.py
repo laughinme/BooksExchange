@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get(
-    path='/',
+    path='',
     response_model=list[RoleModel],
     summary='List all roles'
 )

@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get(
-    path='/',
+    path='',
     response_model=list[ExchangeModel],
     summary='List all exchanges related to current user',
 )

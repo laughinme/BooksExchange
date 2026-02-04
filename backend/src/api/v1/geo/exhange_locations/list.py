@@ -12,7 +12,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 
 
 @router.get(
-    path='/',
+    path='',
     response_model=list[ExchangeLocation],
     summary='List all exchange points sorted by distance to the user',
 )

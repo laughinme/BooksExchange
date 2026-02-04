@@ -12,7 +12,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 
 
 @router.get(
-    path='/',
+    path='',
     response_model=AuthorModel,
     summary='Get specific author by its id',
     responses={404: {'description': 'Author with this `author_id` not found'}},

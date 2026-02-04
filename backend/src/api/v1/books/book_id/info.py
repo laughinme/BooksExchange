@@ -15,7 +15,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 
 
 @router.get(
-    path='/',
+    path='',
     response_model=BookDetailModel,
     summary='Get specific book by its id',
 )

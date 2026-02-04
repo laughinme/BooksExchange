@@ -13,7 +13,7 @@ config = Settings() # pyright: ignore[reportCallIssue]
 
 
 @router.get(
-    path='/',
+    path='',
     response_model=CursorPage[ExchangeModel],
     summary='List all exchanges (cursor pagination)',
 )

@@ -54,7 +54,7 @@ async def cancel_exchange(
 
 
 @router.patch(
-    path='/',
+    path='',
     response_model=ExchangeModel,
     summary='Edit exchange terms',
 )
