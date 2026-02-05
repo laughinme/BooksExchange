@@ -1,5 +1,5 @@
 from uuid import UUID
-from sqlalchemy import select, func, or_
+from sqlalchemy import select, func, or_, case
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from domain.books import ApprovalStatus
@@ -68,14 +68,14 @@ class BooksInterface:
         max_distance: float | None = None,
         min_rating: float | None = None,
     ) -> list[Book]:
-        w_geo, w_pop, w_rec, w_int = 1.0, 2.0, 1.5, 1.0
+        w_geo, w_pop, w_rec, w_int, w_lang = 0.2, 2.0, 1.2, 2.8, 0.5
         fresh_period = 3
         score = 0
 
         distance_expr = None
         if lat is not None and lon is not None:
             distance_expr = dist_expression(ExchangeLocation, lat, lon)
-            geo_score = func.least(10 / (1 + distance_expr), 10)
+            geo_score = func.least(1 / (1 + distance_expr), 1)
             score += w_geo * geo_score
 
         views = func.coalesce(BookStats.views, 0)
@@ -88,6 +88,20 @@ class BooksInterface:
         interest_score = func.least(func.coalesce(UserInterest.coef, 0), 30)
 
         score += w_pop * popularity_score + w_rec * recent_score + w_int * interest_score
+
+        city_match_expr = None
+        if user.city_id is not None:
+            city_match_expr = case(
+                (ExchangeLocation.city_id == user.city_id, 1),
+                else_=0,
+            )
+
+        if user.language_code is not None:
+            lang_score = case(
+                (Book.language_code == user.language_code, 1),
+                else_=0,
+            )
+            score += w_lang * lang_score
 
         stmt = (
             select(Book)
@@ -125,11 +139,6 @@ class BooksInterface:
         if min_rating is not None:
             stmt = stmt.where(rating_expr >= min_rating)
 
-        if user.language_code is not None:
-            stmt = stmt.where(Book.language_code == user.language_code)
-        if user.city_id is not None:
-            stmt = stmt.where(ExchangeLocation.city_id == user.city_id)
-
         # Sorting
         if sort == "distance" and distance_expr is not None:
             stmt = stmt.order_by(distance_expr.asc(), Book.created_at.desc())
@@ -138,7 +147,10 @@ class BooksInterface:
         elif sort == "newest":
             stmt = stmt.order_by(Book.created_at.desc())
         else:
-            stmt = stmt.order_by(score.desc())
+            if city_match_expr is not None:
+                stmt = stmt.order_by(city_match_expr.desc(), score.desc())
+            else:
+                stmt = stmt.order_by(score.desc())
 
         stmt = stmt.limit(limit)
 
