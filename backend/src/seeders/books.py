@@ -6,6 +6,7 @@ from random import Random
 from uuid import uuid4
 
 from sqlalchemy import select, func
+from sqlalchemy.orm import selectinload
 from database.relational_db import (
     UoW,
     Book,
@@ -175,6 +176,14 @@ class BooksSeeder(BaseSeeder):
             seed_users.append(user)
 
         await uow.flush()
+        if seed_users:
+            ids = [user.id for user in seed_users if user.id]
+            if ids:
+                (await session.execute(
+                    select(User)
+                    .options(selectinload(User.roles))
+                    .where(User.id.in_(ids))
+                )).scalars().all()
 
         for account, user in zip(SEED_ACCOUNTS, seed_users):
             desired = [
