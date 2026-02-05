@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 from fastapi import UploadFile, HTTPException, status
 
 from domain.books import ApprovalStatus
+from core.config import Settings
 from core.storage import MediaStorage
 from database.relational_db import (
     Book,
@@ -21,6 +22,7 @@ from domain.statistics import Interaction
 
 logger = logging.getLogger(__name__)
 storage = MediaStorage()
+settings = Settings()  # type: ignore
 
 class BookService:
     def __init__(
@@ -53,6 +55,10 @@ class BookService:
         for b in books:
             setattr(b, 'is_liked_by_user', b.id in liked)
             setattr(b, 'is_viewed_by_user', b.id in viewed)
+            stats = b.stats
+            setattr(b, 'total_views', stats.views if stats else 0)
+            setattr(b, 'total_likes', stats.likes if stats else 0)
+            setattr(b, 'total_reserves', stats.reserves if stats else 0)
         return books
 
     async def get_book(self, book_id: UUID, user: User | None = None) -> Book | None:
@@ -87,6 +93,8 @@ class BookService:
 
     async def create_book(self, payload: BookCreate, user: User):
         book = Book(**payload.model_dump())
+        if settings.DEBUG:
+            book.approval_status = ApprovalStatus.APPROVED
         user.books.append(book)
         
         await self.uow.commit()

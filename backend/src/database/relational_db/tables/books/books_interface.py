@@ -1,5 +1,5 @@
 from uuid import UUID
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from domain.books import ApprovalStatus
@@ -78,11 +78,14 @@ class BooksInterface:
             geo_score = func.least(10 / (1 + distance_expr), 10)
             score += w_geo * geo_score
 
-        popularity_score = func.log(1 + BookStats.views + BookStats.likes * 3 + BookStats.reserves * 4)
+        views = func.coalesce(BookStats.views, 0)
+        likes = func.coalesce(BookStats.likes, 0)
+        reserves = func.coalesce(BookStats.reserves, 0)
+        popularity_score = func.log(1 + views + likes * 3 + reserves * 4)
         recent_score = func.exp(
             -(func.extract("epoch", func.now() - Book.created_at) / 86400) / fresh_period
         )
-        interest_score = func.least(UserInterest.coef, 30)
+        interest_score = func.least(func.coalesce(UserInterest.coef, 0), 30)
 
         score += w_pop * popularity_score + w_rec * recent_score + w_int * interest_score
 
@@ -97,8 +100,10 @@ class BooksInterface:
                 (UserInterest.user_id == user.id) & (UserInterest.genre_id == Book.genre_id)
             )
             .where(
-                Book.is_publicly_visible,
-                Book.owner_id != user.id,
+                or_(
+                    Book.is_publicly_visible,
+                    Book.owner_id == user.id,
+                )
             )
         )
         if search:
@@ -116,7 +121,7 @@ class BooksInterface:
         if distance_expr is not None and max_distance is not None:
             stmt = stmt.where(distance_expr <= max_distance)
 
-        rating_expr = func.least(func.coalesce(BookStats.likes, 0) / 10.0, 5.0)
+        rating_expr = func.least(likes / 10.0, 5.0)
         if min_rating is not None:
             stmt = stmt.where(rating_expr >= min_rating)
 

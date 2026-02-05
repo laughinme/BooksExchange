@@ -1,4 +1,4 @@
-import { Award, Heart, ImageOff, MapPin } from "lucide-react";
+import { Award, Bookmark, Eye, Heart, ImageOff, MapPin } from "lucide-react";
 
 import { type Book } from "@/entities/book/model/types";
 import { Badge } from "@/shared/ui/badge";
@@ -12,6 +12,8 @@ type BookCardProps = {
   onLikeToggle?: (bookId: string) => void;
   showStatus?: boolean;
   likePending?: boolean;
+  showStats?: boolean;
+  isOwn?: boolean;
 };
 
 const statusMap: Record<
@@ -35,6 +37,8 @@ export const BookCard = ({
   onLikeToggle,
   showStatus = false,
   likePending = false,
+  showStats = false,
+  isOwn = false,
 }: BookCardProps) => {
   const handleLike = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -70,6 +74,11 @@ export const BookCard = ({
               className={`absolute left-2 top-2 rounded-full px-2 py-1 text-xs font-semibold shadow ${statusInfo.className}`}
             >
               {statusInfo.text}
+            </span>
+          )}
+          {isOwn && (
+            <span className="absolute left-2 top-9 rounded-full bg-primary/80 px-2 py-1 text-xs font-semibold text-primary-foreground shadow">
+              Ваша книга
             </span>
           )}
 
@@ -128,18 +137,35 @@ export const BookCard = ({
           </p>
         </div>
 
+        {showStats && (
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Eye className="size-3.5 text-primary/80" />
+              {book.totalViews ?? 0}
+            </span>
+            <span className="flex items-center gap-1">
+              <Heart className="size-3.5 text-primary/80" />
+              {book.totalLikes ?? 0}
+            </span>
+            <span className="flex items-center gap-1">
+              <Bookmark className="size-3.5 text-primary/80" />
+              {book.totalReserves ?? 0}
+            </span>
+          </div>
+        )}
+
         <Button
-          variant={book.isAvailable ? "default" : "secondary"}
+          variant={book.isAvailable && !isOwn ? "default" : "secondary"}
           className="mt-auto w-full"
-          disabled={!book.isAvailable || likePending}
+          disabled={!book.isAvailable || likePending || isOwn}
           onClick={(event) => {
             event.stopPropagation();
-            if (book.isAvailable) {
+            if (book.isAvailable && !isOwn) {
               onReserve?.();
             }
           }}
         >
-          {book.isAvailable ? "Забронировать" : "Недоступна"}
+          {isOwn ? "Ваша книга" : book.isAvailable ? "Забронировать" : "Недоступна"}
         </Button>
       </CardContent>
     </Card>

@@ -32,6 +32,9 @@ class BookModel(TimestampModel, BaseModel):
     
     is_liked_by_user: bool = Field(False)
     is_viewed_by_user: bool = Field(False)
+    total_views: int = Field(0)
+    total_likes: int = Field(0)
+    total_reserves: int = Field(0)
 
 
 class BookDetailModel(BookModel):

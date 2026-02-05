@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { BookCard } from "@/entities/book/ui/book-card";
 import { bookKeys, useBooksForYou, useToggleLike } from "@/entities/book/model/hooks";
+import { useProfileQuery } from "@/entities/profile/model/hooks";
 import { type BookFilters } from "@/entities/book/model/types";
 import { ReserveBookModal } from "@/features/book/ui/reserve-book-modal";
 import { BookFiltersPanel } from "@/features/book/ui/book-filters";
@@ -23,6 +24,7 @@ export const HomePage = () => {
   });
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
   const toggleLike = useToggleLike();
+  const { data: profile } = useProfileQuery();
 
   const effectiveFilters = useMemo(
     () => ({ ...filters, query: queryParam }),
@@ -121,6 +123,8 @@ export const HomePage = () => {
               onReserve={() => setSelectedBookId(book.id)}
               onLikeToggle={handleLikeToggle}
               likePending={toggleLike.isPending}
+              showStats
+              isOwn={book.owner?.id === profile?.id}
             />
           ))}
         </div>

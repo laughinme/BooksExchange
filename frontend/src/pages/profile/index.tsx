@@ -202,6 +202,7 @@ export const ProfilePage = () => {
                 showStatus
                 onSelect={() => navigate(`/book/${book.id}`)}
                 onReserve={() => undefined}
+                isOwn
               />
             ))}
           </div>
