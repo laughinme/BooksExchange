@@ -45,7 +45,7 @@ export const BookCard = ({
   const coverUrl = book.photoUrls[0] || null;
 
   return (
-    <Card className="group h-full overflow-hidden border-border/70 bg-card/90 transition-all hover:-translate-y-1 hover:border-primary/40">
+    <Card className="group h-full overflow-hidden border-border/70 bg-card/90 transition-all hover:-translate-y-1 hover:border-primary/40 flex flex-col">
       <div className="relative">
         <div
           role="button"
@@ -98,7 +98,7 @@ export const BookCard = ({
         </Button>
       </div>
 
-      <CardContent className="flex flex-col gap-3 p-4">
+      <CardContent className="flex flex-1 flex-col gap-3 p-4">
         <div
           role="button"
           tabIndex={0}

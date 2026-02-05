@@ -8,25 +8,59 @@ import { useLogin } from "@/features/auth/model/hooks";
 import { profileQueryKey } from "@/entities/profile/model/hooks";
 import type { Profile } from "@/entities/profile/model/types";
 import { hasRole } from "@/shared/authz";
+import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
+import { Separator } from "@/shared/ui/separator";
 
 type FormValues = {
   email: string;
   password: string;
 };
 
+type DemoAccount = {
+  id: string;
+  label: string;
+  role: "Админ" | "Пользователь";
+  email: string;
+  password: string;
+};
+
+const demoAccounts: DemoAccount[] = [
+  {
+    id: "admin",
+    label: "Администратор",
+    role: "Админ",
+    email: "admin@books.local",
+    password: "admin1234",
+  },
+  {
+    id: "seed",
+    label: "Демо пользователь",
+    role: "Пользователь",
+    email: "seed@books.local",
+    password: "seed1234",
+  },
+  {
+    id: "reader",
+    label: "Читатель",
+    role: "Пользователь",
+    email: "reader@books.local",
+    password: "reader1234",
+  },
+];
+
 export const LoginPage = () => {
-  const { register, handleSubmit, formState } = useForm<FormValues>();
+  const { register, handleSubmit, formState, setValue } = useForm<FormValues>();
   const loginMutation = useLogin();
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
-  const onSubmit = async (values: FormValues) => {
+  const performLogin = async (values: FormValues) => {
     setError(null);
     try {
       await loginMutation.mutateAsync(values);
@@ -48,6 +82,16 @@ export const LoginPage = () => {
     }
   };
 
+  const handleQuickFill = (account: DemoAccount) => {
+    setValue("email", account.email, { shouldDirty: true, shouldValidate: true });
+    setValue("password", account.password, { shouldDirty: true, shouldValidate: true });
+  };
+
+  const handleQuickLogin = async (account: DemoAccount) => {
+    handleQuickFill(account);
+    await performLogin({ email: account.email, password: account.password });
+  };
+
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background px-4">
       <div className="absolute inset-0 -z-10 be-app-bg" />
@@ -57,7 +101,7 @@ export const LoginPage = () => {
           <CardTitle>Войти</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          <form className="space-y-4" onSubmit={handleSubmit(performLogin)}>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -100,7 +144,78 @@ export const LoginPage = () => {
             </Button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-muted-foreground">
+          <Separator className="my-6" />
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  Тестовые аккаунты
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Подходят для демо и быстрой проверки
+                </p>
+              </div>
+              <Badge variant="muted">Seed</Badge>
+            </div>
+
+            <div className="space-y-3">
+              {demoAccounts.map((account) => (
+                <div
+                  key={account.id}
+                  className="rounded-lg border border-border/60 bg-muted/30 p-3"
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-foreground">
+                          {account.label}
+                        </p>
+                        <Badge
+                          variant={account.role === "Админ" ? "default" : "secondary"}
+                        >
+                          {account.role}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Email:{" "}
+                        <span className="font-mono text-foreground">
+                          {account.email}
+                        </span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Пароль:{" "}
+                        <span className="font-mono text-foreground">
+                          {account.password}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleQuickFill(account)}
+                        disabled={loginMutation.isPending}
+                      >
+                        Заполнить
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => handleQuickLogin(account)}
+                        disabled={loginMutation.isPending}
+                      >
+                        Войти
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <p className="mt-6 text-center text-sm text-muted-foreground">
             Ещё нет аккаунта?{" "}
             <Link to="/register" className="text-primary underline">
               Зарегистрироваться

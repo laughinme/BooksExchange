@@ -50,23 +50,29 @@ export const UserHeader = () => {
 
   return (
     <header className="sticky top-0 z-30 flex w-full items-center gap-4 border-b border-border/60 bg-sidebar/90 px-4 py-3 backdrop-blur-md supports-[backdrop-filter]:bg-sidebar/75 be-shadow-header">
-      <Link to="/home" className="flex items-center gap-2">
-        <BookOpen className="size-6 text-primary" />
-        <span className="text-lg font-semibold hidden md:inline text-foreground">Book Exchange</span>
-      </Link>
+      <div className="flex flex-1 items-center gap-2">
+        <Link to="/home" className="flex items-center gap-2">
+          <BookOpen className="size-6 text-primary" />
+          <span className="text-lg font-semibold hidden md:inline text-foreground">
+            Book Exchange
+          </span>
+        </Link>
+      </div>
 
-      <form onSubmit={handleSubmit} className="relative hidden md:block flex-1 max-w-xl">
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Найти книгу..."
-          className="pl-10 bg-input border-border/60 focus-visible:ring-primary/40"
-          aria-label="Поиск книг"
-        />
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-      </form>
+      <div className="hidden md:flex flex-[2] items-center justify-center">
+        <form onSubmit={handleSubmit} className="relative w-full max-w-xl">
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Найти книгу..."
+            className="pl-10 bg-input border-border/60 focus-visible:ring-primary/40"
+            aria-label="Поиск книг"
+          />
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        </form>
+      </div>
 
-      <div className="flex items-center gap-2 ml-auto">
+      <div className="flex flex-1 items-center justify-end gap-2">
         <Button
           variant="secondary"
           size="sm"
@@ -86,6 +92,17 @@ export const UserHeader = () => {
           <Plus className="size-4" />
           Добавить книгу
         </Button>
+        {isAdmin && (
+          <Button
+            variant="secondary"
+            size="sm"
+            className="hidden sm:inline-flex"
+            onClick={() => navigate("/admin")}
+          >
+            <LayoutDashboard className="size-4" />
+            Админка
+          </Button>
+        )}
 
         <Button
           variant="ghost"

@@ -15,6 +15,7 @@ from database.relational_db import (
     Language,
     User,
     City,
+    Role,
 )
 from domain.books import Condition, ApprovalStatus
 from core.config import Settings, BASE_DIR
@@ -85,6 +86,27 @@ DEFAULT_LOCATIONS = [
     }
 ]
 
+SEED_ACCOUNTS = [
+    {
+        "email": "admin@books.com",
+        "password": "admin1234",
+        "username": "Admin",
+        "roles": ["admin"],
+    },
+    {
+        "email": "demo@books.com",
+        "password": "demo1234",
+        "username": "Demo user",
+        "roles": ["member"],
+    },
+    {
+        "email": "reader@books.com",
+        "password": "reader1234",
+        "username": "Reader",
+        "roles": ["member"],
+    },
+]
+
 
 @register
 class BooksSeeder(BaseSeeder):
@@ -113,22 +135,69 @@ class BooksSeeder(BaseSeeder):
         else:
             logger.info("Found %d seed book photos in %s.", len(photo_files), photo_dir.resolve())
 
-        seed_user = await session.scalar(
-            select(User).where(User.email == "seed@books.local")
-        )
-        if seed_user is None:
-            logger.info("Seed user is missing; creating seed user.")
-            password_hash = await hash_password("seed1234")
-            seed_user = User(
-                email="seed@books.local",
-                password_hash=password_hash,
-                username="Seed User",
-                public=True,
+        required_role_slugs = {slug for acc in SEED_ACCOUNTS for slug in acc["roles"]}
+        role_rows = (await session.execute(
+            select(Role).where(Role.slug.in_(required_role_slugs))
+        )).scalars().all()
+        role_by_slug = {role.slug: role for role in role_rows}
+        missing_roles = required_role_slugs - set(role_by_slug.keys())
+        if missing_roles:
+            logger.warning(
+                "Missing roles for seed users: %s",
+                ", ".join(sorted(missing_roles)),
             )
-            session.add(seed_user)
-            await uow.flush()
 
-        seed_owner_id = seed_user.id
+        seed_users: list[User] = []
+        for account in SEED_ACCOUNTS:
+            user = await session.scalar(
+                select(User).where(User.email == account["email"])
+            )
+            if user is None:
+                logger.info("Seed user %s is missing; creating.", account["email"])
+                password_hash = await hash_password(account["password"])
+                user = User(
+                    email=account["email"],
+                    password_hash=password_hash,
+                    username=account["username"],
+                    public=True,
+                    is_onboarded=True,
+                )
+                session.add(user)
+            else:
+                if settings.APP_STAGE == "dev":
+                    user.password_hash = await hash_password(account["password"])
+                    
+                if not user.username:
+                    user.username = account["username"]
+                    
+                user.public = True
+                user.is_onboarded = True
+            seed_users.append(user)
+
+        await uow.flush()
+
+        for account, user in zip(SEED_ACCOUNTS, seed_users):
+            desired = [
+                role_by_slug[slug]
+                for slug in account["roles"]
+                if slug in role_by_slug
+            ]
+            if not desired:
+                continue
+            existing = {role.slug for role in user.roles}
+            for role in desired:
+                if role.slug not in existing:
+                    user.roles.append(role)
+
+        seed_owner_ids = [user.id for user in seed_users if user.id]
+        if not seed_owner_ids:
+            fallback_owner_id = await session.scalar(
+                select(User.id).order_by(User.id)
+            )
+            if fallback_owner_id is None:
+                logger.warning("No users available for book ownership; skipping books.")
+                return 0
+            seed_owner_ids = [fallback_owner_id]
 
         authors = (await session.execute(
             select(Author.id).order_by(Author.id)
@@ -222,6 +291,7 @@ class BooksSeeder(BaseSeeder):
         genre_cycle = cycle(genres)
         location_cycle = cycle(locations)
         language_cycle = cycle(preferred_languages)
+        owner_cycle = cycle(seed_owner_ids)
         condition_cycle = cycle(
             [Condition.NEW, Condition.PERFECT, Condition.GOOD, Condition.NORMAL]
         )
@@ -235,7 +305,7 @@ class BooksSeeder(BaseSeeder):
                 continue
 
             genre_id = next(genre_cycle)
-            owner_id = seed_owner_id
+            owner_id = next(owner_cycle)
             exchange_location_id = next(location_cycle)
             language_code = next(language_cycle)
             condition = next(condition_cycle)
