@@ -148,9 +148,6 @@ export const LoginPage = () => {
                 <p className="text-sm font-semibold text-foreground">
                   Тестовые аккаунты
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Подходят для демо и быстрой проверки
-                </p>
               </div>
               <Badge variant="muted">Demo</Badge>
             </div>
@@ -167,24 +164,9 @@ export const LoginPage = () => {
                         <p className="text-sm font-semibold text-foreground">
                           {account.label}
                         </p>
-                        <Badge
-                          variant={account.role === "Админ" ? "default" : "secondary"}
-                        >
-                          {account.role}
-                        </Badge>
+
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        Email:{" "}
-                        <span className="font-mono text-foreground">
-                          {account.email}
-                        </span>
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Пароль:{" "}
-                        <span className="font-mono text-foreground">
-                          {account.password}
-                        </span>
-                      </p>
+
                     </div>
                     <div className="flex gap-2">
                       <Button
