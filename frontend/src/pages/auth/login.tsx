@@ -166,7 +166,15 @@ export const LoginPage = () => {
                         </p>
 
                       </div>
+                      <div className="space-y-0.5 text-[11px] leading-4 text-muted-foreground">
+                        <p>
+                          <span className="font-medium text-foreground/70">
+                            Email:
+                          </span>{" "}
+                          <span className="font-mono">{account.email}</span>
+                        </p>
 
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       <Button
