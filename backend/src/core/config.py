@@ -100,6 +100,10 @@ class Settings(BaseSettings):
         return self
 
 
+def is_debug_mode(settings: "Settings") -> bool:
+    return settings.DEBUG if settings.DEBUG is not None else settings.APP_STAGE == "dev"
+
+
 def configure_logging():
     logging.basicConfig(
         level=logging.INFO,

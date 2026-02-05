@@ -3,6 +3,7 @@ from datetime import date, datetime
 from uuid import UUID, uuid4
 from fastapi import UploadFile, status, HTTPException
 
+from core.config import Settings, is_debug_mode
 from core.storage import MediaStorage
 from domain.users import UserPatch, Gender
 from domain.roles import RoleModel
@@ -20,6 +21,7 @@ from database.relational_db import (
 from .exceptions import IncorrectGenreId, IncorrectCityId
 
 storage = MediaStorage()
+settings = Settings()  # type: ignore
 
 class UserService:
     def __init__(
@@ -169,6 +171,11 @@ class UserService:
         return users, next_cursor
 
     async def admin_set_ban(self, target: User, banned: bool) -> User:
+        if is_debug_mode(settings):
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                detail="Admin banning is disabled in DEBUG mode",
+            )
         target.banned = banned
         await self.uow.commit()
         await self.uow.session.refresh(target)

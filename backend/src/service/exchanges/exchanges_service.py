@@ -4,7 +4,7 @@ from uuid import UUID
 from datetime import datetime
 from fastapi import HTTPException
 
-from core.config import Settings
+from core.config import Settings, is_debug_mode
 from database.relational_db import (
     UoW,
     BooksInterface,
@@ -221,6 +221,8 @@ class ExchangeService:
         return await self._ensure_exchange(exchange_id)
 
     async def admin_force_finish(self, exchange_id: UUID) -> Exchange:
+        if is_debug_mode(settings):
+            raise HTTPException(403, detail="Admin exchange moderation is disabled in DEBUG mode")
         exchange = await self._ensure_exchange(exchange_id)
         # Only allow finishing if there is no other finished exchange for the same book
         has_other_finished = await self.ex_repo.exists_finished_for_book(exchange.book_id, exclude_id=exchange.id)
@@ -230,6 +232,8 @@ class ExchangeService:
         return exchange
 
     async def admin_force_cancel(self, exchange_id: UUID) -> Exchange:
+        if is_debug_mode(settings):
+            raise HTTPException(403, detail="Admin exchange moderation is disabled in DEBUG mode")
         exchange = await self._ensure_exchange(exchange_id)
         exchange.progress = ExchangeProgress.CANCELED
         return exchange

@@ -4,6 +4,7 @@ import { CheckCircle, XCircle, ShieldCheck } from "lucide-react";
 import { adminApi } from "@/shared/api/admin";
 import { adaptBook } from "@/entities/book/model/adapters";
 import { type Book } from "@/entities/book/model/types";
+import { isDebug } from "@/shared/config/env";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Spinner } from "@/shared/ui/spinner";
@@ -31,6 +32,7 @@ export const ModerationPage = () => {
   });
 
   const handleReject = (bookId: string) => {
+    if (isDebug) return;
     const reason = window.prompt("Укажите причину отклонения") || "";
     rejectMutation.mutate({ bookId, reason });
   };
@@ -100,6 +102,7 @@ export const ModerationPage = () => {
                           size="sm"
                           variant="destructive"
                           className="be-shadow-none"
+                          disabled={isDebug || rejectMutation.isPending}
                           onClick={() => handleReject(book.id)}
                         >
                           <XCircle className="size-4" />

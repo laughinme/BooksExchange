@@ -10,6 +10,7 @@ import {
 import { adminApi } from "@/shared/api/admin";
 import { adaptExchange } from "@/entities/exchange/model/adapters";
 import { type Exchange } from "@/entities/exchange/model/types";
+import { isDebug } from "@/shared/config/env";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
@@ -209,6 +210,7 @@ export const AdminExchangesPage = () => {
                               size="sm"
                               variant="secondary"
                               className="gap-2 be-shadow-none"
+                              disabled={isDebug || forceFinish.isPending}
                               onClick={() => forceFinish.mutate(ex.id)}
                             >
                               <Award className="size-4" />
@@ -220,6 +222,7 @@ export const AdminExchangesPage = () => {
                               size="sm"
                               variant="destructive"
                               className="gap-2 be-shadow-none"
+                              disabled={isDebug || forceCancel.isPending}
                               onClick={() => forceCancel.mutate(ex.id)}
                             >
                               <X className="size-4" />

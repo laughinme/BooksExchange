@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 from fastapi import UploadFile, HTTPException, status
 
 from domain.books import ApprovalStatus
-from core.config import Settings
+from core.config import Settings, is_debug_mode
 from core.storage import MediaStorage
 from database.relational_db import (
     Book,
@@ -93,7 +93,7 @@ class BookService:
 
     async def create_book(self, payload: BookCreate, user: User):
         book = Book(**payload.model_dump())
-        if settings.DEBUG:
+        if is_debug_mode(settings):
             book.approval_status = ApprovalStatus.APPROVED
         user.books.append(book)
         
@@ -237,6 +237,8 @@ class BookService:
         return book
     
     async def reject_book(self, book_id: UUID, user: User, reason: str | None = None):
+        if is_debug_mode(settings):
+            raise HTTPException(403, detail="Admin book rejection is disabled in DEBUG mode")
         book = await self.get_book(book_id, user)
         if book is None:
             raise HTTPException(404, detail='Book with this id not found')

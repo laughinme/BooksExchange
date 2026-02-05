@@ -5,6 +5,7 @@ import { RefreshCw, Search } from "lucide-react";
 import { adminApi } from "@/shared/api/admin";
 import { rolesApi } from "@/shared/api/roles";
 import { adaptProfile } from "@/entities/profile/model/adapters";
+import { isDebug } from "@/shared/config/env";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
@@ -192,7 +193,7 @@ export const UsersPage = () => {
                           size="sm"
                           variant={user.banned ? "secondary" : "outline"}
                           className="be-shadow-none"
-                          disabled={toggleBan.isPending}
+                          disabled={isDebug || toggleBan.isPending}
                           onClick={() =>
                             toggleBan.mutate({
                               userId: user.id,

@@ -5,6 +5,7 @@ from typing import Annotated, Literal
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from core.config import Settings, is_debug_mode
 from core.rbac import (
     ROLES_CACHE_TTL_SECONDS, 
     roles_cache_key,
@@ -18,6 +19,7 @@ from service.users import UserService, get_user_service
 security = HTTPBearer(
     description="Access token must be passed as Bearer to authorize request"
 )
+settings = Settings()  # type: ignore
 
 
 async def extract_jti(request: Request) -> str:
@@ -59,7 +61,7 @@ async def auth_user(
     user = await svc.get_user(user_id)
     if user is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Not Authorized")
-    if user.banned:
+    if user.banned and not is_debug_mode(settings):
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
             detail="Your account is banned, contact support: laughinmee@gmail.com",
@@ -132,4 +134,3 @@ def require(
             raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, detail='Tenant roles are not implemented')
         
     return dependency
-
