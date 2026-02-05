@@ -12,7 +12,7 @@ import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 
 type FormValues = {
-  username: string;
+  username?: string;
   email: string;
   password: string;
 };
@@ -26,8 +26,12 @@ export const RegisterPage = () => {
 
   const onSubmit = async (values: FormValues) => {
     setError(null);
+    const payload = {
+      ...values,
+      username: values.username?.trim() || undefined,
+    };
     try {
-      await registerMutation.mutateAsync(values);
+      await registerMutation.mutateAsync(payload);
       await queryClient.ensureQueryData(profileQueryOptions());
       navigate("/home", { replace: true });
     } catch {
@@ -46,25 +50,33 @@ export const RegisterPage = () => {
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-2">
-              <Label htmlFor="username">Имя пользователя</Label>
+              <Label
+                htmlFor="username"
+                className="flex items-center justify-between"
+              >
+                Имя пользователя
+                <span className="text-xs text-muted-foreground">
+                  Необязательно
+                </span>
+              </Label>
               <Input
                 id="username"
                 autoComplete="username"
-                {...register("username", { required: "Введите имя" })}
+                placeholder="Можно оставить пустым"
+                {...register("username")}
               />
-              {formState.errors.username && (
-                <p className="text-sm text-destructive">
-                  {formState.errors.username.message}
-                </p>
-              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="flex items-center justify-between">
+                Email
+                <span className="text-xs text-primary">Обязательно</span>
+              </Label>
               <Input
                 id="email"
                 type="email"
                 autoComplete="email"
+                required
                 {...register("email", { required: "Укажите email" })}
               />
               {formState.errors.email && (
@@ -75,11 +87,18 @@ export const RegisterPage = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Пароль</Label>
+              <Label
+                htmlFor="password"
+                className="flex items-center justify-between"
+              >
+                Пароль
+                <span className="text-xs text-primary">Обязательно</span>
+              </Label>
               <Input
                 id="password"
                 type="password"
                 autoComplete="new-password"
+                required
                 {...register("password", {
                   required: "Введите пароль",
                   minLength: { value: 8, message: "Минимум 8 символов" },

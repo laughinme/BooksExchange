@@ -33,21 +33,21 @@ const demoAccounts: DemoAccount[] = [
     id: "admin",
     label: "Администратор",
     role: "Админ",
-    email: "admin@books.local",
+    email: "admin@books.com",
     password: "admin1234",
   },
   {
-    id: "seed",
+    id: "demo",
     label: "Демо пользователь",
     role: "Пользователь",
-    email: "seed@books.local",
-    password: "seed1234",
+    email: "demo@books.com",
+    password: "demo1234",
   },
   {
     id: "reader",
     label: "Читатель",
     role: "Пользователь",
-    email: "reader@books.local",
+    email: "reader@books.com",
     password: "reader1234",
   },
 ];
@@ -82,13 +82,9 @@ export const LoginPage = () => {
     }
   };
 
-  const handleQuickFill = (account: DemoAccount) => {
+  const handleQuickLogin = async (account: DemoAccount) => {
     setValue("email", account.email, { shouldDirty: true, shouldValidate: true });
     setValue("password", account.password, { shouldDirty: true, shouldValidate: true });
-  };
-
-  const handleQuickLogin = async (account: DemoAccount) => {
-    handleQuickFill(account);
     await performLogin({ email: account.email, password: account.password });
   };
 
@@ -156,7 +152,7 @@ export const LoginPage = () => {
                   Подходят для демо и быстрой проверки
                 </p>
               </div>
-              <Badge variant="muted">Seed</Badge>
+              <Badge variant="muted">Demo</Badge>
             </div>
 
             <div className="space-y-3">
@@ -193,20 +189,11 @@ export const LoginPage = () => {
                     <div className="flex gap-2">
                       <Button
                         type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleQuickFill(account)}
-                        disabled={loginMutation.isPending}
-                      >
-                        Заполнить
-                      </Button>
-                      <Button
-                        type="button"
                         size="sm"
                         onClick={() => handleQuickLogin(account)}
                         disabled={loginMutation.isPending}
                       >
-                        Войти
+                        Login
                       </Button>
                     </div>
                   </div>
