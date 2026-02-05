@@ -85,13 +85,18 @@ class UserService:
         file: UploadFile,
         user: User
     ) -> None:
-        if file.content_type not in ("image/jpeg", "image/png"):
+        content_type_map = {
+            "image/jpeg": ".jpg",
+            "image/png": ".png",
+            "image/webp": ".webp",
+            "image/avif": ".avif",
+        }
+        ext = content_type_map.get(file.content_type or "")
+        if ext is None:
             raise HTTPException(
                 status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail="Only jpg / png allowed"
+                detail="Only jpg / png / webp / avif allowed",
             )
-
-        ext  = ".jpg" if file.content_type == "image/jpeg" else ".png"
         name = f"{uuid4()}{ext}"
         if not storage.s3_enabled:
             await storage.clear_prefix(f"users/{user.id}")

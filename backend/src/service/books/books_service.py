@@ -110,25 +110,29 @@ class BookService:
         if not storage.s3_enabled:
             await storage.clear_prefix(f"books/{book_id}")
 
-        book.photo_urls.clear()
-
         urls: list[str] = []
+        content_type_map = {
+            "image/jpeg": ".jpg",
+            "image/png": ".png",
+            "image/webp": ".webp",
+            "image/avif": ".avif",
+        }
         for f in files:
-            if f.content_type not in ("image/jpeg", "image/png"):
-                logger.error(f'Incorrect media type uploaded: {f.content_type}')
+            ext = content_type_map.get(f.content_type or "")
+            if ext is None:
+                logger.error(f"Incorrect media type uploaded: {f.content_type}")
                 raise HTTPException(
                     status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                    detail="Only jpg / png allowed"
+                    detail="Only jpg / png / webp / avif allowed",
                 )
 
-            ext  = ".jpg" if f.content_type == "image/jpeg" else ".png"
             name = f"{uuid4()}{ext}"
 
             key = f"books/{book_id}/{name}"
             url = await storage.upload_uploadfile(key, f)
             urls.append(url)
 
-        book.photo_urls.extend(urls)
+        book.photo_urls = urls
         return book
 
     async def list_books(

@@ -1,9 +1,11 @@
+import { useRef } from "react";
+import type { ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, MapPin, Edit, Book as BookIcon, LayoutDashboard } from "lucide-react";
+import { Calendar, MapPin, Edit, Book as BookIcon, LayoutDashboard, Camera } from "lucide-react";
 
 import { BookCard } from "@/entities/book/ui/book-card";
 import { useMyBooks } from "@/entities/book/model/hooks";
-import { useProfileQuery } from "@/entities/profile/model/hooks";
+import { useProfileQuery, useUpdateProfilePicture } from "@/entities/profile/model/hooks";
 import { useHasRole } from "@/shared/authz";
 import { Avatar } from "@/shared/ui/avatar";
 import { Badge } from "@/shared/ui/badge";
@@ -16,6 +18,24 @@ export const ProfilePage = () => {
   const { data: books = [], isPending: booksPending } = useMyBooks();
   const navigate = useNavigate();
   const isAdmin = useHasRole("admin");
+  const updatePicture = useUpdateProfilePicture();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      await updatePicture.mutateAsync(formData);
+    } finally {
+      event.target.value = "";
+    }
+  };
 
   const memberSince = profile?.createdAt
     ? new Date(profile.createdAt).toLocaleDateString("ru-RU", {
@@ -49,10 +69,28 @@ export const ProfilePage = () => {
         <Card className="lg:col-span-1">
           <CardContent className="space-y-4 p-6 text-center">
             <div className="flex justify-center">
-              <Avatar
-                src={profile.avatarUrl ?? undefined}
-                fallback={profile.username[0]}
-                className="size-24 text-xl"
+              <button
+                type="button"
+                onClick={handleAvatarClick}
+                className="group relative"
+                aria-label="Изменить аватар"
+              >
+                <Avatar
+                  src={profile.avatarUrl ?? undefined}
+                  fallback={profile.username[0]}
+                  className="size-24 text-xl"
+                />
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-full bg-black/0 text-white opacity-0 transition group-hover:bg-black/45 group-hover:opacity-100">
+                  <Camera className="size-5" />
+                  <span className="text-xs font-medium">Сменить</span>
+                </div>
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarChange}
               />
             </div>
             <div>
